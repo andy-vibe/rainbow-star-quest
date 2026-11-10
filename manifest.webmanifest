@@ -1,0 +1,16 @@
+{
+  "name": "Rainbow Star Quest",
+  "short_name": "Star Quest",
+  "description": "A learning adventure: words, sentences, math, science and creative play.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#bfe3ff",
+  "theme_color": "#bfe3ff",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

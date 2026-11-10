@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Rainbow Star Quest</title>
+<meta name="description" content="A learning adventure: words, sentences, math, science and creative play.">
+<meta name="theme-color" content="#bfe3ff">
+<!-- Install as an app (PWA) on iPad, iPhone and Android -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Star Quest">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script src="js/util.js"></script>
+<script src="js/art.js"></script>
+<script src="js/content.js"></script>
+<script src="js/games.js"></script>
+<script src="js/creative.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* Offline support. It only works when the game is served from a web address (https) or localhost. */
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
+</body>
+</html>
