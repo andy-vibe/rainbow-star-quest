@@ -45,10 +45,10 @@ const say = t => t.replace(/\{name\}/g, S().hero ? S().hero.name : 'friend');
 const CAST = {
   hero: { name: () => S().hero.name, draw: m => Art.chibi(Object.assign({}, S().hero, { mood: m })) },
   twinkle: { name: () => 'Twinkle', draw: m => Art.twinkle(m) },
-  lumi: { name: () => 'Lumi', draw: m => Art.lumi(friendStage('lumi'), m) },
-  pix: { name: () => 'Pix', draw: m => Art.pix(friendStage('pix'), m) },
-  nova: { name: () => 'Nova', draw: m => Art.nova(friendStage('nova'), m) },
-  mochi: { name: () => 'Mochi', draw: m => Art.mochi(friendStage('mochi'), m) },
+  lumi: { name: () => 'Lumi', draw: (m, st) => Art.lumi(st || friendStage('lumi'), m) },
+  pix: { name: () => 'Pix', draw: (m, st) => Art.pix(st || friendStage('pix'), m) },
+  nova: { name: () => 'Nova', draw: (m, st) => Art.nova(st || friendStage('nova'), m) },
+  mochi: { name: () => 'Mochi', draw: (m, st) => Art.mochi(st || friendStage('mochi'), m) },
   gloom: { name: () => 'Gloom', draw: () => Art.gloom({ mood: 0 }) },
   glow: { name: () => 'Glow', draw: () => Art.gloom({ mood: 1 }) },
   grumble: { name: () => 'King Grumble', draw: () => Art.gloom({ mood: worldDone(4) ? 1 : 0.1, king: true }) },
@@ -119,32 +119,7 @@ function heroMaker(first) {
       h('div', { class: 'picks' }, lookPickers(hero, redraw), go)));
 }
 
-/* =============== STORY SCENES =============== */
-function playScene(id, bg, done) {
-  const lines = STORY[id];
-  if (!lines) return done();
-  S().seen[id] = true; App.save();
-  let i = 0;
-  const face = h('div', { class: 'sceneface' }), nameEl = h('div', { class: 'scenename' }), textEl = h('div', { class: 'scenetext' });
-  const show = () => {
-    const [who, text, mood] = lines[i];
-    face.innerHTML = draw(who, mood || 'happy');
-    face.className = 'sceneface pop ' + who;
-    nameEl.textContent = CAST[who].name(); nameEl.style.display = CAST[who].name() ? '' : 'none';
-    textEl.textContent = say(text);
-    Voice.say(say(text), who);
-  };
-  const next = () => { Snd.tap(); i++; if (i >= lines.length) { Voice.stop(); done(); } else show(); };
-  App.screen('scene ' + bg,
-    floaters(['✨', '⭐']),
-    h('button', { class: 'linkbtn skip', text: 'Skip ⏭', onclick: () => { Voice.stop(); done(); } }),
-    h('div', { class: 'scenebox' }, face,
-      h('div', { class: 'bubble', onclick: next }, nameEl, textEl,
-        h('div', { class: 'bubblebtns' },
-          h('button', { class: 'iconbtn small', text: '🔊', onclick: e => { e.stopPropagation(); Voice.say(say(lines[i][1]), lines[i][0]); } }),
-          h('button', { class: 'btn', text: 'Next ▶' })))));
-  show();
-}
+/* The story scenes (playScene) are in js/movie.js. */
 
 /* =============== MAP (all worlds) =============== */
 function heroChip() {
@@ -162,12 +137,12 @@ function mapScreen() {
       h('div', { class: 'whost', html: open ? draw(Wd.host) : '' }),
       h('b', { text: Wd.name }),
       h('small', { text: open ? `⭐ ${worldStars(w)} / ${Wd.levels.length * 3}` : 'Locked' }),
-      worldDone(w) ? h('div', { class: 'shard', text: '💠' }) : null);
+      worldDone(w) ? h('div', { class: 'shard', html: Art.shard(w) }) : null);
   });
   App.screen('map bg-map',
     floaters(['⭐', '✨', '☁️']),
     h('div', { class: 'topbar' }, heroChip(),
-      h('div', { class: 'counts' }, h('span', { text: '⭐ ' + totalStars() }), h('span', { text: '💎 ' + S().gems }), h('span', { text: '💠 ' + WORLDS.filter((_, w) => worldDone(w)).length + '/5' })),
+      h('div', { class: 'counts' }, h('span', { text: '⭐ ' + totalStars() }), h('span', { text: '💎 ' + S().gems }), h('span', { class: 'emblemchip' }, h('i', { class: 'emblem', html: Art.star5(WORLDS.map((_, w) => worldDone(w))) }), WORLDS.filter((_, w) => worldDone(w)).length + '/5')),
       h('div', { class: 'navbtns' },
         h('button', { class: 'navbtn', html: '👗<small>Dress up</small>', onclick: wardrobe }),
         h('button', { class: 'navbtn', html: '🎨<small>Studio</small>', onclick: studio }),
@@ -190,6 +165,7 @@ function worldScreen(w) {
       h('div', { class: 'nstars', text: '⭐'.repeat(st) + '☆'.repeat(3 - st) }));
   });
   App.screen('world bg-' + Wd.id,
+    h('div', { class: 'sceneryback', html: Art.scenery(Wd.id) }),
     floaters(Wd.float),
     h('div', { class: 'topbar' }, backBtn(mapScreen), h('h2', { text: `${Wd.emoji} ${Wd.name}` }), h('div', { class: 'counts' }, h('span', { text: `⭐ ${worldStars(w)} / ${Wd.levels.length * 3}` }))),
     h('div', { class: 'path' }, nodes),
@@ -222,37 +198,72 @@ function startLevel(w, l) {
 
 /* =============== PLAY A LEVEL =============== */
 const PRAISE = ['Great job!', 'Super!', 'You did it!', 'Amazing!', 'Wow!', 'So smart!', 'Yes!', 'Brilliant!'];
+const SHOTS = { hero: '⭐', lumi: '❄️', pix: '🧱', nova: '🎵', mochi: '🐾' };
+/* throw an emoji from one thing on screen to another, then call after() */
+function shoot(fromEl, toEl, emoji, after) {
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  const x = a.left + a.width / 2, y = a.top + a.height / 2, dx = b.left + b.width / 2 - x, dy = b.top + b.height / 2 - y;
+  const s = h('span', { class: 'shot', text: emoji, style: { left: x + 'px', top: y + 'px' } });
+  document.body.append(s);
+  anim(s, [{ transform: 'translate(-50%,-50%) scale(.6) rotate(0)' }, { transform: `translate(calc(-50% + ${dx / 2}px), calc(-50% + ${dy / 2 - 46}px)) scale(1.6) rotate(200deg)`, offset: 0.5 }, { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1) rotate(400deg)` }], { duration: 460, easing: 'ease-in', fill: 'forwards' });
+  setTimeout(() => { s.remove(); after && after(); }, 460);
+}
+const hop = el => anim(el, [{ translate: '0 0' }, { translate: '0 -45%' }, { translate: '0 0' }], { duration: 420, easing: 'ease-out' });
+const wobble = el => anim(el, [{ transform: 'scale(1,1)' }, { transform: 'scale(1.25,.75)' }, { transform: 'scale(.85,1.2)' }, { transform: 'scale(1,1)' }], { duration: 420 });
+
 function runQuiz(w, l) {
   const Wd = WORLDS[w], L = Wd.levels[l], boss = L.t === 'boss';
   const tier = clamp(Wd.tier + (S().settings.boost || 0), 1, 5);
-  const qs = Gen[L.t](tier);
+  const qs = Gen[L.t](tier), n = qs.length;
   let i = 0, mistakes = 0, hearts = 5, over = false;
-  const dots = h('div', { class: 'dots' }, qs.map(() => h('i')));
   const heartsEl = h('div', { class: 'hearts' });
-  const bossEl = boss ? h('div', { class: 'bossbar' }) : null;
   const ptext = h('div', { class: 'ptext' }), pbtns = h('div', { class: 'pbtns' });
   const visual = h('div', { class: 'visual' }), answer = h('div', { class: 'answer' }), fb = h('div', { class: 'feedback' });
+
+  /* normal level: the hero hops along a path of stones to a gift */
+  const stones = qs.map(() => h('i', { class: 'stone' }));
+  const goal = h('span', { class: 'goal', text: '🎁' });
+  const runner = h('div', { class: 'runner', html: draw('hero') });
+  const strip = h('div', { class: 'strip' }, h('div', { class: 'stones' }, stones, goal), runner);
+  strip.style.setProperty('--n1', n + 1);
+  const place = () => runner.style.setProperty('--i', i);
+
+  /* boss level: the team on the left, the Gloom on the right */
+  const team = ['hero', ...FRIENDS.filter(f => S().seen[WORLDS[f.world].id + '-in']).map(f => f.id)];
+  const teamEl = h('div', { class: 'team' }, team.map(t => h('div', { class: 'mini', html: draw(t) })));
+  const bossFace = h('div', { class: 'bossface' }), meterFill = h('i');
+  const bossEl = boss ? h('div', { class: 'bossbar' }, teamEl,
+    h('div', { class: 'meterbox' }, h('b', { text: L.name }), h('div', { class: 'meter' }, meterFill), h('small', { text: '😠 Make the Gloom happy! 😊' })),
+    bossFace) : null;
   const drawBoss = () => {
     if (!boss) return;
-    const mood = i / qs.length;
-    bossEl.innerHTML = `<div class="bossface">${Art.gloom({ mood, king: w === 4 })}</div><div class="meterbox"><b>${esc(L.name)}</b><div class="meter"><i style="width:${mood * 100}%"></i></div><small>😠 Make the Gloom happy! 😊</small></div>`;
+    const mood = i / n;
+    bossFace.innerHTML = Art.gloom({ mood, king: w === 4 });
+    meterFill.style.width = mood * 100 + '%';
     heartsEl.textContent = '❤️'.repeat(hearts) + '🤍'.repeat(5 - hearts);
+  };
+  const teamHit = () => {            // a friend throws some magic at the Gloom
+    const shown = [...teamEl.children].filter(m => m.offsetParent !== null);
+    const m = pick(shown.length ? shown : [...teamEl.children]);
+    hop(m);
+    shoot(m, bossFace, SHOTS[team[[...teamEl.children].indexOf(m)]] || '⭐', () => { drawBoss(); wobble(bossFace); Snd.pop(); burst(bossFace, ['✨', '💖', '⭐']); });
   };
   let missed = false;                // a question can cost only one heart
   const miss = () => {
     mistakes++;
     if (boss && !over && !missed) {
-      missed = true; hearts--; drawBoss();
-      if (hearts <= 0) { over = true; setTimeout(() => failScreen(w, l), 700); }
+      missed = true; hearts--; drawBoss(); Snd.grr();
+      shoot(bossFace, teamEl, '☁️', () => { teamEl.classList.remove('shake'); void teamEl.offsetWidth; teamEl.classList.add('shake'); });
+      if (hearts <= 0) { over = true; setTimeout(() => failScreen(w, l), 900); }
     }
   };
   function next() {
     if (over) return;
-    if (i >= qs.length) return finishLevel(w, l, mistakes, false);
+    if (i >= n) return finishLevel(w, l, mistakes, false);
     const q = qs[i];
     App.q = q;                       // the question on screen (handy for testing)
     missed = false;
-    [...dots.children].forEach((d, k) => d.classList.toggle('cur', k === i));
+    stones.forEach((d, k) => d.classList.toggle('cur', k === i));
     ptext.textContent = q.prompt;
     pbtns.replaceChildren(h('button', { class: 'iconbtn small', text: '🔊', title: 'Read it to me', onclick: () => Voice.say(q.say || q.prompt, Wd.host) }));
     if (q.hear) pbtns.append(h('button', { class: 'iconbtn small', text: '👂', title: 'Hear the answer', onclick: () => Voice.say(q.hear, Wd.host) }));
@@ -261,8 +272,13 @@ function runQuiz(w, l) {
     Render[q.kind](q, answer, wrong => {
       if (over) return;
       const st = S().stats[q.subj]; st.t++; if (!wrong) st.c++;
-      dots.children[i].className = wrong ? 'meh' : 'ok';
-      i++; drawBoss();
+      stones[i].className = 'stone ' + (wrong ? 'meh' : 'ok');
+      i++;
+      if (boss) teamHit();
+      else {
+        place(); hop(runner);
+        if (i >= n) setTimeout(() => { goal.textContent = '🌟'; popIn(goal); burst(goal); Snd.star(); }, 450);
+      }
       fb.className = 'feedback show';
       const go = () => { if (!over) next(); };
       if (q.fact) {
@@ -278,13 +294,13 @@ function runQuiz(w, l) {
   }
   App.screen('play bg-' + Wd.id + (boss ? ' boss' : ''),
     h('div', { class: 'topbar' },
-      h('button', { class: 'iconbtn', text: '✕', onclick: () => { over = true; worldScreen(w); } }), dots, heartsEl),
+      h('button', { class: 'iconbtn', text: '✕', onclick: () => { over = true; worldScreen(w); } }), boss ? h('span') : strip, boss ? heartsEl : h('span')),
     bossEl,
     h('div', { class: 'qwrap' },
       h('div', { class: 'promptrow' }, h('div', { class: 'mini', html: draw(Wd.host) }), h('div', { class: 'pbubble' }, ptext, pbtns)),
       visual, answer),
     fb);
-  drawBoss();
+  place(); drawBoss();
   next();
 }
 function failScreen(w, l) {

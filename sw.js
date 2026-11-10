@@ -1,9 +1,9 @@
 /* Service worker: lets the game open with no internet after the first visit.
    It tries the network first (so new versions show up), and uses the saved copy when offline. */
-const CACHE = 'rainbow-star-quest-v1';
+const CACHE = 'rainbow-star-quest-v2';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
-  'js/util.js', 'js/art.js', 'js/content.js', 'js/games.js', 'js/creative.js', 'js/main.js',
+  'js/util.js', 'js/art.js', 'js/content.js', 'js/games.js', 'js/creative.js', 'js/movie.js', 'js/main.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
 

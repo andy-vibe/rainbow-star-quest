@@ -189,12 +189,17 @@ const WORLDS = [
     ] },
 ];
 
-/* Story scenes. Each line: [who, text, mood]. {name} is the hero's name. */
+/* Story scenes. They play like a little movie.
+   A line is [who, text, mood, effect]. {name} is the hero's name.
+   A line ['fx', effect, who] plays an effect by itself. The effects live in js/movie.js. */
 const STORY = {
   intro: [
-    ['narr', 'Long ago, the Rainbow Star lit up the land of Lumina.'],
-    ['narr', 'One night, the grumpy Glooms came. CRACK! The star broke into five shards.'],
-    ['narr', 'The colors of the land began to fade...'],
+    ['narr', 'Long ago, the Rainbow Star lit up the land of Lumina.', null, 'starshine'],
+    ['narr', 'One night, the grumpy Glooms came.', null, 'gloomsfly'],
+    ['fx', 'crack'],
+    ['narr', 'The star broke into five shards. They flew far, far away.'],
+    ['narr', 'The colors of the land began to fade...', null, 'fade'],
+    ['fx', 'twinkledrop'],
     ['twinkle', 'Hello, {name}! I am Twinkle. I am a tiny piece of the star.'],
     ['twinkle', 'I need a hero. Will you help me find the five shards?'],
     ['hero', 'Yes! Let us go, Twinkle!'],
@@ -202,22 +207,25 @@ const STORY = {
   'frost-in': [
     ['twinkle', 'Brr! This is Frost Peaks. The first shard is near.'],
     ['lumi', 'Oh! Hello... I am Lumi. I can make ice magic.', 'sad'],
-    ['lumi', 'But my magic goes wrong sometimes. So I hide here.', 'sad'],
+    ['lumi', 'But my magic goes wrong sometimes. So I hide here.', 'sad', 'magicoops'],
     ['hero', 'Mistakes are OK! That is how we learn. Come with us!'],
-    ['lumi', 'Really? ... OK. I will try!'],
+    ['lumi', 'Really? ... OK. I will try!', 'happy', 'snowburst'],
   ],
   'frost-boss': [
     ['gloom', 'Grrr! This shard is MINE. Go away!'],
-    ['lumi', 'I am scared... but I will not hide this time!'],
+    ['lumi', 'I am scared... but I will not hide this time!', 'happy', 'snowburst'],
   ],
   'frost-out': [
+    ['fx', 'shard'],
     ['glow', 'Wait... that was fun! I feel warm inside.'],
     ['lumi', 'I made mistakes. I tried again. Now I feel brave!'],
+    ['fx', 'powerup', 'lumi'],
     ['twinkle', 'Lumi got the Brave Tiara! We have shard number 1.'],
     ['twinkle', 'Next stop: Block Valley!'],
   ],
   'block-in': [
-    ['pix', 'Hey! I am Pix. I build FAST! Look at my tower!'],
+    ['pix', 'Hey! I am Pix. I build FAST! Look at my tower!', 'happy', 'towerup'],
+    ['fx', 'towerdown'],
     ['narr', 'CRASH! The tower falls down.'],
     ['pix', 'Oh no. Not again...', 'sad'],
     ['lumi', 'Try to count the blocks first. Slow and steady.'],
@@ -228,42 +236,48 @@ const STORY = {
     ['pix', 'This time I have a plan. Ready, {name}?'],
   ],
   'block-out': [
+    ['fx', 'shard'],
     ['glow', 'You built that together? Can I help next time?'],
-    ['pix', 'I counted. I planned. My tower is the tallest ever!'],
+    ['pix', 'I counted. I planned. My tower is the tallest ever!', 'happy', 'towerup'],
+    ['fx', 'powerup', 'pix'],
     ['twinkle', 'Pix got the Golden Hammer! We have shard number 2.'],
     ['twinkle', 'I hear music... Let us go to Star City!'],
   ],
   'star-in': [
     ['nova', 'Hi... I am Nova. I sing in a band called the Starlights.'],
-    ['nova', 'Our songs chase the Glooms away. But they took our words!', 'sad'],
+    ['nova', 'Our songs chase the Glooms away. But they took our words!', 'sad', 'notesdrop'],
     ['nova', 'Now I am too shy to sing.', 'sad'],
     ['pix', 'We will fix the words with you. One by one!'],
     ['nova', 'With friends... maybe I can do it.'],
   ],
   'star-boss': [
     ['gloom', 'LA LA LA! I can not hear you! No more songs!'],
-    ['nova', 'My friends are with me. I will sing!'],
+    ['nova', 'My friends are with me. I will sing!', 'happy', 'notes'],
   ],
   'star-out': [
+    ['fx', 'shard'],
     ['glow', 'That song... it makes me want to dance!'],
-    ['nova', 'I found my voice! My friends make me strong.'],
+    ['nova', 'I found my voice! My friends make me strong.', 'happy', 'notes'],
+    ['fx', 'powerup', 'nova'],
     ['twinkle', 'Nova got the Star Mic! We have shard number 3.'],
     ['twinkle', 'Look, pink flowers! Ribbon Meadow is this way.'],
   ],
   'meadow-in': [
-    ['mochi', 'Meow! I am Mochi. Why is the sky blue? Why are Glooms grumpy? Why...'],
+    ['mochi', 'Meow! I am Mochi. Why is the sky blue? Why are Glooms grumpy? Why...', 'happy', 'questions'],
     ['nova', 'Wow. You ask so many questions!'],
     ['mochi', 'Sorry... Do I ask too many?', 'sad'],
     ['hero', 'No! Questions help us find answers. Keep asking, Mochi!'],
-    ['mochi', 'Yay! Then let us find out everything!'],
+    ['mochi', 'Yay! Then let us find out everything!', 'happy', 'questions'],
   ],
   'meadow-boss': [
     ['gloom', 'Go away! No questions! I do not want to talk.'],
-    ['mochi', 'Hmm. Why is this Gloom so sad? I want to know.'],
+    ['mochi', 'Hmm. Why is this Gloom so sad? I want to know.', 'happy', 'questions'],
   ],
   'meadow-out': [
+    ['fx', 'shard'],
     ['glow', 'Nobody ever asked how I feel. Thank you.'],
     ['mochi', 'Now I know! Glooms live in the dark. They are lonely!'],
+    ['fx', 'powerup', 'mochi'],
     ['twinkle', 'Mochi got the Wonder Glass! We have shard number 4.'],
     ['twinkle', 'The last shard is in Gloom Castle. Be brave!'],
   ],
@@ -278,11 +292,13 @@ const STORY = {
     ['hero', 'We do not want to fight. We want to share the light!'],
   ],
   'castle-out': [
+    ['fx', 'shard'],
     ['grumble', 'You... want to be MY friend?'],
     ['hero', 'Yes! Come to our party. Everyone is welcome.'],
+    ['fx', 'starjoin'],
     ['narr', 'The five shards came together. The Rainbow Star shone again!'],
-    ['narr', 'The Glooms were never grumpy again. Now they are called the Glows.'],
-    ['twinkle', 'You did it, {name}! You are the Star Guardian!'],
+    ['narr', 'The Glooms were never grumpy again. Now they are called the Glows.', null, 'glows'],
+    ['twinkle', 'You did it, {name}! You are the Star Guardian!', 'happy', 'party'],
   ],
 };
 

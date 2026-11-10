@@ -2,7 +2,9 @@
 'use strict';
 
 const Art = {};
-const svgWrap = (inner, vb = '0 -14 200 280') => `<svg class="char" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const svgWrap = (inner, vb = '0 -14 200 280') => `<svg class="char" viewBox="${vb}" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+/* eyes that blink (each character blinks at its own time) */
+const eyesG = inner => `<g class="eyes" style="animation-delay:-${(Math.random() * 4.5).toFixed(2)}s">${inner}</g>`;
 
 /* A cute girl character. Options change hair, dress and extras. */
 Art.chibi = function (o) {
@@ -59,8 +61,8 @@ Art.chibi = function (o) {
     <path d="M84,146 Q100,160 116,146" stroke="${o.trim}" stroke-width="6" fill="none" stroke-linecap="round"/>
     <circle cx="100" cy="95" r="58" fill="${K}"/>
     <ellipse cx="60" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/><ellipse cx="140" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/>
-    <ellipse cx="78" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/><ellipse cx="122" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/>
-    <circle cx="81" cy="99" r="3.6" fill="#fff"/><circle cx="125" cy="99" r="3.6" fill="#fff"/>
+    ${eyesG(`<ellipse cx="78" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/><ellipse cx="122" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/>
+    <circle cx="81" cy="99" r="3.6" fill="#fff"/><circle cx="125" cy="99" r="3.6" fill="#fff"/>`)}
     ${mouth}
     <path d="M42,97 Q36,34 100,30 Q164,34 158,97 Q150,66 126,60 Q116,80 98,62 Q72,62 42,97 Z" fill="${H}"/>
     ${headAcc}${handAcc}${o.extra}
@@ -95,8 +97,8 @@ Art.pix = function (stage = 1, mood = 'happy') {
     <rect x="86" y="154" width="28" height="22" fill="#2fb377"/><rect x="72" y="124" width="10" height="36" fill="#2fb377"/><rect x="118" y="124" width="10" height="36" fill="#2fb377"/>
     <rect x="52" y="30" width="96" height="92" fill="#f2c79b"/>
     <rect x="52" y="30" width="96" height="24" fill="#d9662b"/><rect x="52" y="54" width="14" height="22" fill="#d9662b"/><rect x="134" y="54" width="14" height="22" fill="#d9662b"/>
-    <rect x="72" y="70" width="16" height="16" fill="#fff"/><rect x="112" y="70" width="16" height="16" fill="#fff"/>
-    <rect x="78" y="72" width="10" height="14" fill="#2d3a8c"/><rect x="118" y="72" width="10" height="14" fill="#2d3a8c"/>
+    ${eyesG(`<rect x="72" y="70" width="16" height="16" fill="#fff"/><rect x="112" y="70" width="16" height="16" fill="#fff"/>
+    <rect x="78" y="72" width="10" height="14" fill="#2d3a8c"/><rect x="118" y="72" width="10" height="14" fill="#2d3a8c"/>`)}
     <rect x="66" y="92" width="6" height="6" fill="#e0a070"/><rect x="128" y="92" width="6" height="6" fill="#e0a070"/>
     ${mouth}
     <rect x="46" y="14" width="108" height="24" fill="#ffd54a"/><rect x="38" y="34" width="124" height="10" fill="#f0b90b"/><rect x="88" y="6" width="24" height="12" fill="#ffe58a"/>
@@ -119,8 +121,8 @@ Art.mochi = function (stage = 1, mood = 'happy') {
     <ellipse cx="100" cy="100" rx="68" ry="58" fill="#fff6e8" stroke="#e8c9a0" stroke-width="3"/>
     <path d="M118,46 Q150,50 164,84 Q150,70 128,72 Q120,60 118,46Z" fill="#ffb26b"/>
     <ellipse cx="56" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/><ellipse cx="144" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/>
-    <ellipse cx="74" cy="100" rx="8" ry="10.5" fill="#3b2a4a"/><ellipse cx="126" cy="100" rx="8" ry="10.5" fill="#3b2a4a"/>
-    <circle cx="77" cy="96" r="3.4" fill="#fff"/><circle cx="129" cy="96" r="3.4" fill="#fff"/>
+    ${eyesG(`<ellipse cx="74" cy="100" rx="8" ry="10.5" fill="#3b2a4a"/><ellipse cx="126" cy="100" rx="8" ry="10.5" fill="#3b2a4a"/>
+    <circle cx="77" cy="96" r="3.4" fill="#fff"/><circle cx="129" cy="96" r="3.4" fill="#fff"/>`)}
     <path d="M94,110 L106,110 L100,117 Z" fill="#ff8fab"/>
     ${mouth}
     <path d="M40,104 L14,98 M40,112 L14,116 M160,104 L186,98 M160,112 L186,116" stroke="#c9a57a" stroke-width="2.5" stroke-linecap="round"/>
@@ -134,8 +136,8 @@ Art.mochi = function (stage = 1, mood = 'happy') {
 Art.twinkle = (mood = 'happy') => svgWrap(`
   <circle cx="100" cy="130" r="92" fill="#fff6b0" opacity=".45"/>
   <path d="M100,36 L124,100 L192,104 L138,146 L158,212 L100,174 L42,212 L62,146 L8,104 L76,100 Z" fill="#ffd54a" stroke="#f0a800" stroke-width="5" stroke-linejoin="round"/>
-  <ellipse cx="80" cy="128" rx="7" ry="10" fill="#3b2a4a"/><ellipse cx="120" cy="128" rx="7" ry="10" fill="#3b2a4a"/>
-  <circle cx="83" cy="124" r="3" fill="#fff"/><circle cx="123" cy="124" r="3" fill="#fff"/>
+  ${eyesG(`<ellipse cx="80" cy="128" rx="7" ry="10" fill="#3b2a4a"/><ellipse cx="120" cy="128" rx="7" ry="10" fill="#3b2a4a"/>
+  <circle cx="83" cy="124" r="3" fill="#fff"/><circle cx="123" cy="124" r="3" fill="#fff"/>`)}
   <ellipse cx="66" cy="144" rx="9" ry="5" fill="#ff9bb0" opacity=".7"/><ellipse cx="134" cy="144" rx="9" ry="5" fill="#ff9bb0" opacity=".7"/>
   ${mood === 'sad' ? '<path d="M90,154 Q100,146 110,154" stroke="#b5654a" stroke-width="3.5" fill="none" stroke-linecap="round"/>' : '<path d="M88,146 Q100,160 112,146" stroke="#b5654a" stroke-width="3.5" fill="none" stroke-linecap="round"/>'}
 `);
@@ -155,9 +157,9 @@ Art.gloom = function (o) {
     <path d="M32,160 Q22,60 100,52 Q178,60 168,160 Q174,214 146,204 Q132,232 114,208 Q100,236 86,208 Q68,232 54,204 Q26,214 32,160Z" fill="${body}" stroke="${dark}" stroke-width="5" stroke-linejoin="round"/>
     <path d="M56,74 Q44,50 60,40 M144,74 Q156,50 140,40" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
     <circle cx="60" cy="38" r="6" fill="${m > 0.6 ? '#ff7eb6' : dark}"/><circle cx="140" cy="38" r="6" fill="${m > 0.6 ? '#7fd4f5' : dark}"/>
-    <ellipse cx="76" cy="124" rx="16" ry="18" fill="#fff"/><ellipse cx="124" cy="124" rx="16" ry="18" fill="#fff"/>
+    ${eyesG(`<ellipse cx="76" cy="124" rx="16" ry="18" fill="#fff"/><ellipse cx="124" cy="124" rx="16" ry="18" fill="#fff"/>
     <circle cx="79" cy="128" r="8" fill="#2b2140"/><circle cx="121" cy="128" r="8" fill="#2b2140"/>
-    <circle cx="82" cy="124" r="3" fill="#fff"/><circle cx="124" cy="124" r="3" fill="#fff"/>
+    <circle cx="82" cy="124" r="3" fill="#fff"/><circle cx="124" cy="124" r="3" fill="#fff"/>`)}
     <path d="M54,${100 - brow} L94,${100 + brow}" stroke="${dark}" stroke-width="7" stroke-linecap="round"/>
     <path d="M146,${100 - brow} L106,${100 + brow}" stroke="${dark}" stroke-width="7" stroke-linecap="round"/>
     <path d="M78,170 Q100,${my} 122,170" stroke="#2b2140" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -166,3 +168,75 @@ Art.gloom = function (o) {
 };
 
 Art.narr = () => `<div class="char emoji-char">📖</div>`;
+
+/* ---------- Star shards and the Rainbow Star ---------- */
+const SHARD_COLORS = ['#6fd0f7', '#5fd38d', '#ff6fb1', '#ffd54a', '#b388ff'];
+/* one crystal shard; k = world number (0 to 4) */
+Art.shard = function (k) {
+  const c = SHARD_COLORS[k % 5], li = lerpColor(c, '#ffffff', 0.55), dk = lerpColor(c, '#000000', 0.25);
+  return `<svg class="shardsvg" viewBox="0 0 100 124" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="50,4 90,42 50,120 10,42" fill="${c}" stroke="#fff" stroke-width="5" stroke-linejoin="round"/>
+    <polygon points="50,6 88,42 50,54" fill="${li}" opacity=".9"/><polygon points="50,6 12,42 50,54" fill="${li}" opacity=".5"/>
+    <polygon points="12,42 50,54 50,117" fill="${dk}" opacity=".35"/>
+    <path d="M28,32 L37,23" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>`;
+};
+/* the Rainbow Star, made of 5 pieces. filled = which pieces are found. */
+Art.star5 = function (filled, face) {
+  const C = [100, 108], pt = (r, deg) => [C[0] + r * Math.cos(deg * Math.PI / 180), C[1] + r * Math.sin(deg * Math.PI / 180)];
+  let segs = '';
+  for (let k = 0; k < 5; k++) {
+    const a = -90 + 72 * k, on = filled[k];
+    const p = [C, pt(42, a - 36), pt(96, a), pt(42, a + 36)].map(q => q.map(v => v.toFixed(1)).join(',')).join(' ');
+    segs += `<polygon class="seg${on ? ' on' : ''}" points="${p}" fill="${on ? SHARD_COLORS[k] : 'rgba(255,255,255,.3)'}" stroke="#fff" stroke-width="${on ? 4 : 3}" ${on ? '' : 'stroke-dasharray="7 6"'} stroke-linejoin="round"/>`;
+  }
+  const f = face && filled.every(Boolean) ? `<g class="starface">${eyesG('<ellipse cx="86" cy="100" rx="6" ry="9" fill="#3b2a4a"/><ellipse cx="114" cy="100" rx="6" ry="9" fill="#3b2a4a"/><circle cx="88" cy="96" r="2.5" fill="#fff"/><circle cx="116" cy="96" r="2.5" fill="#fff"/>')}<path d="M90,116 Q100,127 110,116" stroke="#3b2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>` : '';
+  return `<svg class="star5" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">${segs}${f}</svg>`;
+};
+
+/* ---------- Scenery for each world (drawn at the bottom of a scene) ---------- */
+Art.scenery = function (id) {
+  let s = '';
+  const R = (x, y, w, hh, f, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${f}" ${extra}/>`;
+  if (id === 'frost') {
+    s += `<path d="M0,420 L0,310 L130,130 L250,280 L390,90 L540,290 L660,160 L800,300 L900,210 L1000,300 L1000,420Z" fill="#c6e0fa"/>`;
+    s += `<path d="M130,130 L168,187 L142,176 L124,196 L96,177Z M390,90 L436,152 L404,140 L384,164 L352,142Z M660,160 L700,212 L672,202 L650,222 L626,206Z" fill="#fff"/>`;
+    s += `<path d="M0,420 L0,345 Q250,290 520,350 T1000,335 L1000,420Z" fill="#fff"/>`;
+    s += R(760, 250, 90, 100, '#bfe9ff') + R(740, 280, 30, 70, '#a9dcf7') + R(850, 270, 30, 80, '#a9dcf7');
+    s += `<path d="M760,250 L805,190 L850,250Z M740,280 L755,250 L770,280Z M850,270 L865,240 L880,270Z" fill="#7cc8f2"/>` + R(795, 310, 22, 40, '#7cc8f2', 'rx="11"');
+    for (const [x, y, k] of [[90, 352, 1], [180, 364, 0.8], [560, 358, 0.9], [940, 352, 1.1]])
+      s += `<path d="M${x},${y} l${-26 * k},0 l${26 * k},${-70 * k} l${26 * k},${70 * k}Z" fill="#6fbfa8"/><path d="M${x},${y - 70 * k} l${-10 * k},${26 * k} l${20 * k},0Z" fill="#fff"/>`;
+  } else if (id === 'block') {
+    [3, 4, 4, 5, 6, 6, 5, 4, 3, 3, 4, 5, 5, 4, 6, 7, 7, 6, 4, 3].forEach((v, i) => { const x = i * 50, y = 360 - v * 26; s += R(x, y, 50, 420 - y, '#8ad66a') + R(x, y, 50, 10, '#6cc24a'); });
+    s += R(0, 356, 1000, 64, '#6cc24a') + R(0, 376, 1000, 44, '#9b6b43');
+    for (let i = 0; i < 20; i++) s += R(i * 50 + (i % 2 ? 10 : 28), 386 + (i % 3) * 8, 10, 10, '#855a36');
+    s += R(140, 280, 26, 76, '#8a5a34') + R(98, 248, 110, 34, '#2f8f44') + R(108, 214, 90, 40, '#3fa34d') + R(124, 186, 58, 30, '#4db85c');
+    s += R(620, 60, 120, 28, '#fff', 'opacity=".9"') + R(650, 38, 60, 24, '#fff', 'opacity=".9"') + R(240, 90, 90, 24, '#fff', 'opacity=".8"') + R(860, 40, 64, 64, '#ffd54a');
+  } else if (id === 'star') {
+    [150, 210, 120, 260, 180, 230, 140, 200, 280, 160, 220, 130, 190, 250, 170].forEach((v, i) => {
+      const x = i * 68 - 10; s += R(x, 360 - v, 62, v, '#1d1440');
+      for (let r = 0; r < Math.floor(v / 34) - 1; r++) for (let c = 0; c < 3; c++) if ((i * 7 + r * 3 + c * 5) % 4) s += R(x + 10 + c * 16, 360 - v + 14 + r * 34, 9, 13, (i + r + c) % 5 ? '#ffd98a' : '#ff8ccf', 'opacity=".85"');
+    });
+    s += `<path d="M180,0 L60,360 L330,360Z" fill="#fff" opacity=".10"/><path d="M820,0 L670,360 L940,360Z" fill="#ff8ccf" opacity=".13"/><path d="M500,0 L380,360 L620,360Z" fill="#7ff0e2" opacity=".10"/>`;
+    s += R(0, 352, 1000, 68, '#3a2466') + R(0, 352, 1000, 8, '#ff4d9d');
+    for (let i = 0; i < 12; i++) s += `<circle cx="${40 + i * 84}" cy="356" r="6" fill="#ffe58a"/>`;
+  } else if (id === 'meadow') {
+    s += `<ellipse cx="220" cy="430" rx="420" ry="150" fill="#b9eaa0"/><ellipse cx="800" cy="440" rx="460" ry="170" fill="#a4e089"/><path d="M0,420 L0,372 Q500,330 1000,372 L1000,420Z" fill="#8fd672"/>`;
+    s += `<path d="M430,420 Q470,360 560,340 T700,292" stroke="#ffb3d5" stroke-width="26" fill="none" stroke-linecap="round"/>`;
+    s += R(690, 232, 84, 60, '#fff3e0') + `<path d="M678,236 L732,188 L786,236Z" fill="#ff8fb8"/>` + R(722, 258, 20, 34, '#c98a5a');
+    const cols = ['#ff7eb6', '#ffd54a', '#ffffff', '#b388ff'];
+    for (let i = 0; i < 22; i++) { const x = (i * 47 + 20) % 1000, y = 374 + (i * 29) % 42; s += `<path d="M${x},${y} v-14" stroke="#4fae52" stroke-width="3"/><circle cx="${x}" cy="${y - 16}" r="6.5" fill="${cols[i % 4]}"/><circle cx="${x}" cy="${y - 16}" r="2.5" fill="#f5a623"/>`; }
+  } else if (id === 'castle') {
+    s += `<circle cx="810" cy="92" r="74" fill="#fff3b0" opacity=".18"/><circle cx="810" cy="92" r="48" fill="#fff3b0"/>`;
+    s += `<path d="M0,420 L0,330 Q160,260 330,330 T680,320 T1000,310 L1000,420Z" fill="#241a4a"/>`;
+    s += R(380, 190, 240, 170, '#130e2b') + R(350, 150, 56, 210, '#17113a') + R(594, 150, 56, 210, '#17113a') + R(470, 110, 60, 250, '#17113a');
+    s += `<path d="M344,150 L378,96 L412,150Z M588,150 L622,96 L656,150Z M462,110 L500,46 L538,110Z" fill="#3b2a7a"/>`;
+    for (let i = 0; i < 6; i++) s += R(384 + i * 40, 178, 22, 14, '#130e2b');
+    s += [[370, 190], [614, 190], [491, 150], [430, 250], [550, 250]].map(([x, y]) => R(x, y, 16, 24, '#ffd54a', 'rx="8"')).join('');
+    s += `<path d="M476,360 v-50 a24,24 0 0 1 48,0 v50Z" fill="#0b0820"/><path d="M0,420 L0,372 Q500,345 1000,372 L1000,420Z" fill="#1a1338"/>`;
+  } else {
+    s += `<ellipse cx="200" cy="440" rx="430" ry="160" fill="#a9e2c0"/><ellipse cx="780" cy="450" rx="480" ry="180" fill="#bfe6a8"/><path d="M0,420 L0,376 Q500,340 1000,376 L1000,420Z" fill="#9bd98a"/>`;
+    for (const [x, c] of [[300, '#ff8fb8'], [372, '#7cc8f2'], [650, '#ffd54a']]) s += R(x, 322, 52, 42, '#fff3e0') + `<path d="M${x - 8},326 L${x + 26},292 L${x + 60},326Z" fill="${c}"/>` + R(x + 20, 342, 12, 22, '#c98a5a');
+    for (const [x, y] of [[120, 352], [470, 350], [560, 356], [860, 350], [930, 358]]) s += R(x - 4, y - 26, 8, 30, '#8a5a34') + `<circle cx="${x}" cy="${y - 40}" r="24" fill="#5fc27a"/>`;
+  }
+  return `<svg class="scenery" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">${s}</svg>`;
+};

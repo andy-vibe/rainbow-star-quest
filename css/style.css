@@ -125,7 +125,7 @@ h1, h2, h4, p { margin: 0; }
 .worldcard b { font-size: clamp(17px, 2.2vw, 21px); } .worldcard small { font-weight: 800; font-size: 15px; }
 .wemoji { font-size: 34px; } .whost { width: 110px; height: 140px; }
 .worldcard.locked { filter: grayscale(.85); opacity: .75; }
-.shard { position: absolute; top: 6px; right: 10px; font-size: 26px; animation: pulse 1.5s infinite; }
+.shard { position: absolute; top: 6px; right: 10px; animation: pulse 1.5s infinite; }
 
 /* ---------- one world ---------- */
 .path { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px clamp(12px, 2vw, 22px); max-width: 900px; margin-top: 2vh; }
@@ -314,4 +314,112 @@ h1, h2, h4, p { margin: 0; }
   .navbtn small { display: none; }
   .scenetools { flex-direction: row; flex-wrap: wrap; }
   .scenetools .chips { max-width: none; }
+}
+
+/* =====================================================================
+   ANIMATION: living characters, movie scenes, hero path, boss fight
+   ===================================================================== */
+.eyes { transform-box: fill-box; transform-origin: center; animation: blink 4.6s infinite; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+@keyframes bob { 50% { transform: translateY(-2.5%) scaleY(1.015); } }
+@keyframes hopping { 50% { transform: translateY(-12%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.castrow > div, .worldhost, .cardhost { animation: bob 2.8s ease-in-out infinite; transform-origin: 50% 100%; }
+.castrow > div:nth-child(2n) { animation-delay: -1.2s; } .castrow > div:nth-child(3n) { animation-delay: -.6s; }
+.star5 { width: 100%; height: 100%; display: block; overflow: visible; }
+.shardsvg { width: 100%; height: 100%; display: block; }
+
+/* map and world extras */
+.emblemchip { display: inline-flex; align-items: center; gap: 6px; }
+.emblem { display: inline-block; width: 30px; height: 31px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .35)); }
+.emblem .seg:not(.on) { fill: #d9d3ea; stroke: #b9b0d6; }
+.shard { width: 26px; height: 32px; font-size: 0; }
+.sceneryback { position: fixed !important; left: 0; right: 0; bottom: 0; height: 44vh; z-index: 0 !important; pointer-events: none; }
+.sceneryback .scenery { width: 100%; height: 100%; display: block; }
+
+/* ---------- movie scenes ---------- */
+#app.movie { padding: 0; gap: 0; overflow: hidden; background: #1a1330; align-items: stretch; }
+.mtop { flex: none; height: calc(env(safe-area-inset-top, 0px) + clamp(36px, 6vh, 54px)); display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 2px max(16px, env(safe-area-inset-left, 0px)); }
+.mtop .linkbtn { color: #fff; }
+#app.movie > .mscene { flex: 1 1 0; min-height: 0; position: relative; overflow: hidden; cursor: pointer; }
+.mbg { position: absolute; inset: 0; transition: filter 2s; }
+.mbg.grey { filter: grayscale(.95) brightness(.78); }
+.mbg.dawn { opacity: 0; transition: opacity 1.8s; } .mbg.dawn.on { opacity: 1; }
+.mbg .scenery { position: absolute; left: 0; bottom: 0; width: 100%; height: 74%; display: block; }
+.actors { position: absolute; left: 0; right: 0; top: 0; bottom: 2%; display: flex; align-items: flex-end; justify-content: center; gap: clamp(2px, 2.5vw, 36px); padding: 0 10px; pointer-events: none; }
+.actor { height: 58%; width: min(28vw, 250px); flex: 0 1 auto; min-width: 0; transform: scale(.86); transform-origin: 50% 100%; filter: brightness(.9) saturate(.8); transition: transform .25s, filter .25s; }
+.actor.talk { transform: scale(1.08); filter: none; z-index: 2; }
+.actor .bob { width: 100%; height: 100%; animation: bob 2.6s ease-in-out infinite; transform-origin: 50% 100%; }
+.actor.dance .bob, .fxi.dance > .in { animation: hopping .5s ease-in-out infinite; }
+.mfx { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fxi { position: absolute; transform: translate(-50%, -50%); }
+.fxi.ground { transform: translateX(-50%); }
+.fxi > .in { width: 100%; height: 100%; }
+.fxi.bigstar { width: min(44vw, 29vh); aspect-ratio: 200 / 210; filter: drop-shadow(0 0 14px rgba(255, 255, 255, .9)); }
+.fxi.rays { width: min(120vw, 80vh); aspect-ratio: 1; }
+.fxi.rays.small { width: min(70vw, 46vh); }
+.fxi.rays > .in { border-radius: 50%; background: repeating-conic-gradient(rgba(255, 255, 255, .6) 0 8deg, transparent 8deg 24deg);
+  -webkit-mask: radial-gradient(circle, #000 8%, transparent 68%); mask: radial-gradient(circle, #000 8%, transparent 68%); animation: spin 16s linear infinite; }
+.fxi.shard { width: min(17vw, 14vh); aspect-ratio: 100 / 124; filter: drop-shadow(0 0 12px #fff); }
+.fxi.bossgloom { width: min(40vw, 30vh); aspect-ratio: 200 / 280; }
+.fxi.minigloom { width: min(15vw, 13vh); aspect-ratio: 200 / 280; }
+.fxi.emo { font-size: clamp(22px, 4.6vh, 42px); line-height: 1; }
+.fxi.emo.big { font-size: clamp(44px, 9vh, 84px); }
+.fxi.ring { width: min(30vw, 26vh); aspect-ratio: 1; }
+.fxi.ring > .in { border-radius: 50%; border: 7px solid #ffe58a; box-shadow: 0 0 22px #fff, inset 0 0 22px #fff; }
+.fxi.wave { width: min(40vw, 36vh); aspect-ratio: 1; }
+.fxi.wave > .in { border-radius: 50%; background: conic-gradient(#ff5fa2, #ff9f43, #ffe066, #5fd38d, #4aa8ff, #8e6bff, #ff5fa2);
+  -webkit-mask: radial-gradient(circle, transparent 58%, #000 60%, #000 68%, transparent 70%); mask: radial-gradient(circle, transparent 58%, #000 60%, #000 68%, transparent 70%); }
+.mtext { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%) rotate(-6deg); font-size: clamp(44px, 13vw, 120px); font-weight: 900; color: #fff;
+  -webkit-text-stroke: 3px #ff4d9d; text-shadow: 0 6px 0 #d43f84; white-space: nowrap; z-index: 5; }
+.mbanner { position: absolute; left: 50%; bottom: 5%; transform: translateX(-50%); background: linear-gradient(#fff4c7, #ffd54a); color: #3b2a4a; padding: .3em 1em; border-radius: 999px;
+  font-weight: 900; font-size: clamp(18px, 4vw, 36px); box-shadow: 0 5px 0 #e0a800; white-space: nowrap; z-index: 5; }
+.mflash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.tower { position: absolute; left: 86%; bottom: 3%; transform: translateX(-50%); display: flex; flex-direction: column-reverse; }
+.blk { display: block; width: min(8vw, 8vh); height: min(8vw, 8vh); box-shadow: inset -4px -4px 0 rgba(0, 0, 0, .2), inset 4px 4px 0 rgba(255, 255, 255, .4); }
+.msub { flex: none; display: flex; justify-content: center; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.msub .bubble { flex: none; width: 100%; max-width: 900px; min-width: 0; padding: clamp(12px, 2vw, 22px); }
+.msub { max-height: 70vh; overflow: hidden; transition: max-height .45s ease, padding .45s ease; }
+/* during an action beat the bottom bar folds away, like a wide-screen movie */
+.msub.quiet { max-height: calc(env(safe-area-inset-bottom, 0px) + 22px); padding-top: 0; padding-bottom: 0; }
+.msub.quiet .bubble { visibility: hidden; }
+.msub.narr .scenetext { font-style: italic; text-align: center; }
+.msub .scenetext { font-size: clamp(20px, 3.2vw, 32px); min-height: 2.6em; }
+.scenetext .w { opacity: 0; transition: opacity .18s; } .scenetext .w.on { opacity: 1; }
+
+/* ---------- level screen: the hero hops along a path ---------- */
+.strip { flex: 1; position: relative; height: 58px; min-width: 0; --rw: 42px; }
+.stones { position: absolute; left: 0; right: 0; bottom: 2px; display: grid; grid-template-columns: repeat(var(--n1), 1fr); align-items: end; justify-items: center; }
+.stone { display: block; width: clamp(14px, 3.2vw, 30px); height: 11px; border-radius: 50%; background: rgba(255, 255, 255, .85); border: 2px solid rgba(0, 0, 0, .18); transition: background .3s; }
+.stone.ok { background: #5fd38d; } .stone.meh { background: #ffd54a; } .stone.cur { border-color: #ff4d9d; }
+.goal { font-size: 28px; line-height: 1; }
+.runner { position: absolute; bottom: 9px; width: var(--rw); height: 50px; left: calc((var(--i, 0) + .5) * 100% / var(--n1) - var(--rw) / 2); transition: left .42s ease-out; z-index: 2; }
+
+/* ---------- boss fight ---------- */
+.team { display: flex; align-items: flex-end; flex: none; }
+.team .mini { width: 44px; height: 54px; margin-right: -6px; }
+.shot { position: fixed; z-index: 95; pointer-events: none; font-size: 30px; line-height: 1; transform: translate(-50%, -50%); }
+.bossface { animation: bob 2s ease-in-out infinite; transform-origin: 50% 100%; }
+
+@media (max-width: 700px) {
+  .team .mini:nth-child(n+3) { display: none; }
+  .actor { width: 31vw; height: 50%; }
+  .fxi.bossgloom { width: 44vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eyes, .castrow > div, .worldhost, .cardhost, .actor .bob, .bossface, .floaters span { animation: none; }
+}
+
+/* short screens (a phone held sideways): keep the movie stage tall */
+@media (max-height: 480px) {
+  .mtop { height: calc(env(safe-area-inset-top, 0px) + 26px); }
+  .mtop .linkbtn { padding: 0 8px; font-size: 14px; }
+  .msub { padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .msub .bubble { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 20px; }
+  .msub .scenename { margin: 0; font-size: 14px; flex: none; }
+  .msub .scenetext { flex: 1; font-size: clamp(15px, 2.6vw, 20px); min-height: 0; }
+  .msub .bubblebtns { margin: 0; gap: 8px; flex: none; }
+  .msub .bubblebtns .btn { font-size: 15px; }
+  .strip { height: 46px; --rw: 34px; } .runner { height: 40px; }
 }

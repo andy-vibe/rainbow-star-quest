@@ -61,6 +61,30 @@ const Snd = {
     o.connect(g); g.connect(this.ctx.destination);
     o.start(t); o.stop(t + dur + 0.02);
   },
+  /* a tone that slides from one pitch to another */
+  sweep(f1, f2, dur = 0.3, type = 'sine', vol = 0.15, delay = 0) {
+    if (!this.on || !this.ctx) return;
+    const t = this.ctx.currentTime + delay;
+    const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f1, t); o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.start(t); o.stop(t + dur + 0.02);
+  },
+  noise(dur = 0.4, vol = 0.25) {
+    if (!this.on || !this.ctx) return;
+    const n = Math.floor(this.ctx.sampleRate * dur), buf = this.ctx.createBuffer(1, n, this.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
+    const src = this.ctx.createBufferSource(), g = this.ctx.createGain();
+    src.buffer = buf; g.gain.value = vol; src.connect(g); g.connect(this.ctx.destination); src.start();
+  },
+  sparkle() { [784, 988, 1175, 1568, 1976, 2349].forEach((f, i) => this.tone(f, 0.25, 'sine', 0.12, i * 0.09)); },
+  crash() { this.noise(0.6, 0.3); this.sweep(200, 50, 0.5, 'sawtooth', 0.18); },
+  grr() { this.sweep(140, 90, 0.35, 'sawtooth', 0.1); this.sweep(150, 80, 0.3, 'sawtooth', 0.09, 0.22); },
+  whoosh() { this.sweep(300, 1200, 0.25, 'sine', 0.08); },
+  thud() { this.sweep(160, 50, 0.2, 'sine', 0.3); },
   tap() { this.tone(520, 0.06, 'triangle', 0.1); },
   pop() { this.tone(700, 0.08, 'sine', 0.14); },
   ok() { [660, 880, 1320].forEach((f, i) => this.tone(f, 0.16, 'triangle', 0.16, i * 0.08)); },
