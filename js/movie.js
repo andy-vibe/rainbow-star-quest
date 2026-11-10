@@ -109,6 +109,7 @@ function playScene(id, bg, done) {
   function runFx(name, arg, blocking) {
     const fn = FX[name];
     const ms = fn ? (fn(c, arg) || 0) : 0;
+    App.emit('fx', { name, arg, c });
     if (blocking) {
       busy = true; subEl.classList.add('quiet'); talk(null);
       c.after(ms, () => { busy = false; subEl.classList.remove('quiet'); advance(); });
@@ -122,6 +123,7 @@ function playScene(id, bg, done) {
     if (who === 'narr') { talk(null); nameEl.style.display = 'none'; }
     else { const a = enter(who); a.redraw(mood); talk(a); nameEl.textContent = CAST[who].name(); nameEl.style.display = ''; }
     type(str); Voice.say(str, who);
+    App.emit('line', { who, c });
     if (fx) runFx(fx, null, false);
   }
   function advance() { i++; if (i >= lines.length) finish(); else show(); }
@@ -144,6 +146,7 @@ function playScene(id, bg, done) {
   App.screen('movie',
     h('div', { class: 'mtop' }, h('button', { class: 'linkbtn', text: 'Skip ⏭', onclick: finish })),
     sceneEl, subEl);
+  App.emit('scene', { id, c });
   advance();
 }
 

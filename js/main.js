@@ -19,11 +19,16 @@ const App = {
     Snd.on = this.S.settings.sfx; Voice.on = this.S.settings.voice;
   },
   save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.S)); } catch (e) {} },
+  /* tiny event system: App.on('right', fn) ... App.emit('right', data) */
+  handlers: {},
+  on(name, fn) { (this.handlers[name] = this.handlers[name] || []).push(fn); },
+  emit(name, data) { (this.handlers[name] || []).forEach(fn => { try { fn(data || {}); } catch (e) { console.error(e); } }); },
   screen(cls, ...kids) {
     Voice.stop();
     root.className = 'screen ' + cls;
     root.replaceChildren(...kids.flat().filter(Boolean));
     root.scrollTop = 0;
+    this.emit('screen', { cls });
   },
 };
 App.load();
@@ -251,8 +256,10 @@ function runQuiz(w, l) {
   let missed = false;                // a question can cost only one heart
   const miss = () => {
     mistakes++;
+    if (!boss) App.emit('wrong', { boss });
     if (boss && !over && !missed) {
       missed = true; hearts--; drawBoss(); Snd.grr();
+      App.emit('wrong', { boss });
       shoot(bossFace, teamEl, '☁️', () => { teamEl.classList.remove('shake'); void teamEl.offsetWidth; teamEl.classList.add('shake'); });
       if (hearts <= 0) { over = true; setTimeout(() => failScreen(w, l), 900); }
     }
@@ -274,6 +281,7 @@ function runQuiz(w, l) {
       const st = S().stats[q.subj]; st.t++; if (!wrong) st.c++;
       stones[i].className = 'stone ' + (wrong ? 'meh' : 'ok');
       i++;
+      App.emit('right', { boss, last: i >= n });
       if (boss) teamHit();
       else {
         place(); hop(runner);
@@ -301,6 +309,7 @@ function runQuiz(w, l) {
       visual, answer),
     fb);
   place(); drawBoss();
+  App.emit('level', { w, l, boss });
   next();
 }
 function failScreen(w, l) {
@@ -347,6 +356,7 @@ function finishLevel(w, l, mistakes, creative) {
       h('div', { class: 'row' },
         h('button', { class: 'btn ghost', text: '↻ Play again', onclick: () => startLevel(w, l) }),
         h('button', { class: 'btn big', text: 'Next ▶', onclick: after }))));
+  App.emit('win', { w, l, stars, boss });
   Voice.say(lvAfter > lvBefore ? `${msg} Level up! You are now a ${HERO_TITLES[lvAfter - 1]}!` : msg, Wd.host);
 }
 function endingScreen() {
