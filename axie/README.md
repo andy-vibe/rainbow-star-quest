@@ -14,3 +14,6 @@ Code in this folder:
 - `axie.js` loads and draws the characters
 - `pet.js` puts the pet and the enemies into the game
 - `names.js` changes the game wording from "Glooms" to Chimeras
+
+For offline play, `sw.js` saves these files in their own cache (`ART_CACHE`), which is kept when the
+game updates. If you add or change a file in `axie/art/`, add it to the `ART` list and change `ART_CACHE`.

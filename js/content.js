@@ -22,6 +22,8 @@ const RHYMES = [
 
 /* Opposites */
 const OPPOSITES = [['hot', 'cold'], ['big', 'small'], ['up', 'down'], ['happy', 'sad'], ['day', 'night'], ['fast', 'slow'], ['open', 'closed'], ['wet', 'dry'], ['light', 'dark'], ['full', 'empty'], ['young', 'old'], ['soft', 'hard'], ['loud', 'quiet'], ['tall', 'short'], ['clean', 'dirty'], ['first', 'last']];
+/* words that mean almost the same: one of them is never shown as a wrong answer for the other's opposite */
+const SIMILAR = [['big', 'tall'], ['small', 'short'], ['day', 'light'], ['night', 'dark']];
 
 /* ---------- SENTENCES ---------- */
 /* Put the words in order. One list for each difficulty step (1 to 5). */
@@ -71,7 +73,7 @@ const SCI_ORDER = [
   { tier: 2, q: 'How does a flower grow? Put it in order.', steps: [['🌰', 'seed'], ['🌱', 'sprout'], ['🌿', 'plant'], ['🌻', 'flower']] },
   { tier: 2, q: 'Smallest to biggest. Put them in order.', steps: [['🐜', 'ant'], ['🐭', 'mouse'], ['🐶', 'dog'], ['🐘', 'elephant'], ['🐳', 'whale']] },
   { tier: 2, q: 'One day, from start to end.', steps: [['🌅', 'sunrise'], ['☀️', 'noon'], ['🌇', 'sunset'], ['🌙', 'night']] },
-  { tier: 3, q: 'How does a butterfly grow? Put it in order.', steps: [['🥚', 'egg'], ['🐛', 'caterpillar'], ['🟢', 'cocoon'], ['🦋', 'butterfly']] },
+  { tier: 3, q: 'How does a butterfly grow? Put it in order.', steps: [['🥚', 'egg'], ['🐛', 'caterpillar'], ['🟢', 'chrysalis'], ['🦋', 'butterfly']] },
   { tier: 3, q: 'The seasons. Start with spring.', steps: [['🌸', 'spring'], ['☀️', 'summer'], ['🍂', 'autumn'], ['⛄', 'winter']] },
   { tier: 3, q: 'Make water hotter and hotter.', steps: [['🧊', 'ice'], ['💧', 'water'], ['♨️', 'steam']] },
   { tier: 4, q: 'How does rain happen? Put it in order.', steps: [['☀️', 'sun warms the sea'], ['♨️', 'water goes up'], ['☁️', 'clouds form'], ['🌧️', 'rain falls']] },
@@ -100,7 +102,7 @@ const SCI_QUIZ = {
     ['Which animal comes out of an egg?', '🐔 chicken', '🐶 dog', '🐱 cat', 'Birds, fish and frogs all come from eggs.'],
     ['What is a baby dog called?', 'puppy', 'kitten', 'cub', 'A baby bear is called a cub.'],
     ['Which animal is the biggest?', '🐳 blue whale', '🐘 elephant', '🦒 giraffe', 'The blue whale is the biggest animal ever!'],
-    ['What does a caterpillar become?', '🦋 butterfly', '🐝 bee', '🐦 bird', 'A caterpillar changes inside a cocoon.'],
+    ['What does a caterpillar become?', '🦋 butterfly', '🐝 bee', '🐦 bird', 'A caterpillar changes inside a chrysalis.'],
     ['Which part of a plant is under the ground?', 'roots', 'leaves', 'flowers', 'Roots hold the plant and drink water.'],
   ],
   3: [

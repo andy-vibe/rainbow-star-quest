@@ -20,7 +20,7 @@
     @media (max-width: 700px) {
       .axiepet:not(.bar):not(.win) { width: 112px; height: 98px; }
       .bossbar.hasaxie { flex-wrap: wrap; justify-content: space-between; }
-      .bossbar.hasaxie .team { display: none; }
+      .bossbar.hasaxie .team .mini:nth-child(n+2) { display: none; }   /* only the hero stays beside the Axie: the magic shots start from her */
       .bossbar.hasaxie .meterbox { order: 3; flex-basis: 100%; }
     }
     .axierun { position: absolute; right: 62%; bottom: -5px; width: 64px; height: 58px; pointer-events: none; }
@@ -72,11 +72,18 @@
     if (kind === 'title') show('side', 'activity/sleep', true);
     else if ((kind === 'map' || kind === 'world') && window.innerWidth >= 700) show('side', 'activity/appear');   // on a phone it would cover the cards
   };
+  let kind = '';
   App.on('screen', ({ cls }) => {
-    btn.style.display = cls.split(' ')[0] === 'map' ? '' : 'none';     // the pet can be changed on the map
+    kind = cls.split(' ')[0];
+    btn.style.display = kind === 'map' ? '' : 'none';     // the pet can be changed on the map
     clear(); runner = null; actor = null; actorEl = null;
     sceneTimers.forEach(clearTimeout); sceneTimers = [];
-    wait(cls.split(' ')[0]);
+    wait(kind);
+  });
+  /* turning a tablet or phone: show or hide the waiting pet on the map and world screens */
+  window.addEventListener('resize', () => {
+    if (kind !== 'map' && kind !== 'world' || (window.innerWidth >= 700) === !!pet) return;
+    if (pet) clear(); else wait(kind);
   });
   setInterval(() => { if (pet && petMode === 'side' && !document.querySelector('#app.title')) pet.play(one(IDLES)); }, 5000);   // small fidgets
 
@@ -136,12 +143,18 @@
   const ENEMY = ['wolf-gray', 'treant', 'wolf-aquatic', 'treant-flowering'], KING = 'bear-mom', MINI = 'slime';
   const HAPPY = 'battle/get-buff', HIT = 'defense/hit-by-normal', ATTACK = 'attack/melee/normal-attack';
   let world = -1, lastRight = 0;
+  const svgGloom = Art.gloom;
   Art.gloom = function (o) {
     o = o || {};
     const name = o.king ? KING : (world >= 0 && world < 4 ? ENEMY[world] : MINI);
     const happy = (o.mood || 0) >= 0.6, justHit = Date.now() - lastRight < 1200;
-    return `<canvas class="char" data-spine="${name}" data-zoom="1.25" data-anim="${justHit ? HIT : happy ? HAPPY : ''}" data-loop="${!justHit && happy ? 1 : 0}" data-idle="${happy ? HAPPY : ''}"></canvas>`;
+    return `<canvas class="char" data-spine="${name}" data-zoom="1.25" data-anim="${justHit ? HIT : happy ? HAPPY : ''}" data-loop="${!justHit && happy ? 1 : 0}" data-idle="${happy ? HAPPY : ''}" data-mood="${o.mood || 0}" data-king="${o.king ? 1 : 0}"></canvas>`;
   };
+  /* the Chimera files could not be loaded (offline before they were saved): draw the old Gloom so the enemy is not missing */
+  document.addEventListener('spinefail', e => {
+    const cv = e.target;
+    if (cv.dataset.mood != null && cv.parentNode) cv.outerHTML = svgGloom({ mood: +cv.dataset.mood, king: cv.dataset.king === '1' });
+  });
   App.on('scene', ({ id }) => { world = WORLDS.findIndex(w => id.startsWith(w.id)); });
   App.on('level', ({ w, boss }) => {
     world = w;
@@ -149,7 +162,10 @@
     if (face) face.innerHTML = Art.gloom({ mood: 0, king: w === 4 });       // the first face was drawn before we knew the world
   });
   App.on('right', e => { if (e.boss) lastRight = Date.now(); });             // the next face the game draws starts with a "hit" move
-  App.on('wrong', e => { const cv = e.boss && document.querySelector('.bossface canvas'); if (cv && cv._ctl) cv._ctl.play(ATTACK); });
+  App.on('wrong', e => {
+    if (!e.boss) return;
+    setTimeout(() => { const cv = document.querySelector('.bossface canvas'); if (cv && cv._ctl) cv._ctl.play(ATTACK); });   // after the new face is set up
+  });
   Axie.watch();
 
   /* the title screen was drawn before this file loaded */

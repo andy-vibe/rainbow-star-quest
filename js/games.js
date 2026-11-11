@@ -73,7 +73,9 @@ const W = {
       options: wordChoices(ans, [pick(fams[1]), pick(fams[2])]), after: target + ', ' + ans };
   },
   opposite() {
-    const three = sample(OPPOSITES, 3);
+    const [pair, ...rest] = shuffle(OPPOSITES);
+    const near = new Set(SIMILAR.filter(g => g.some(w => pair.includes(w))).flat());   // "light" can not be a wrong answer for "night"
+    const three = [pair, ...sample(rest.filter(p => !p.some(w => near.has(w))), 2)];
     const flip = Math.random() < 0.5;
     const a = three[0][flip ? 1 : 0], b = three[0][flip ? 0 : 1];
     return { key: 'o' + a, subj: 'words', kind: 'choice', prompt: `What is the opposite of "${a}"?`,
@@ -161,7 +163,7 @@ const M = {
     const a = rand(11, 99); let b = Math.random() < 0.15 ? a : rand(11, 99);
     const right = a < b ? '<' : a > b ? '>' : '=';
     const opt = (s, word) => ({ html: `<b>${esc(s)}</b><small>${word}</small>`, correct: s === right });
-    return { key: `s${a}${b}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `${a} is ... than ${b}?`, say: `Is ${a} smaller or bigger than ${b}?`,
+    return { key: `s${a}${b}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `Which sign goes between ${a} and ${b}?`, say: `Is ${a} smaller than ${b}, the same as ${b}, or bigger than ${b}?`,
       visual: `<div class="eqvis"><div class="col">${cubes(a, 'c1')}<div class="eq">${a}</div></div><b class="qm">?</b><div class="col">${cubes(b, 'c2')}<div class="eq">${b}</div></div></div>`,
       options: [opt('<', 'smaller'), opt('=', 'the same'), opt('>', 'bigger')] };
   },
@@ -237,7 +239,7 @@ const M = {
   sub2d2d: () => { const a = rand(35, 99); return M.sub(a, rand(11, a - 10)); },
 };
 Gen.math = tier => fill([
-  [() => M.count(10), () => M.add10(), () => M.count(20), () => M.add10(), () => M.pattern(), () => M.sub10(), () => M.compare(10), () => M.sub10()],
+  [() => M.count(10), () => M.add10(), () => M.count(20), () => M.add10(), () => M.pattern(), () => M.sub10(), () => M.compare(9), () => M.sub10()],   // compare: 10 would be drawn as a ten-stick, taught later
   [() => M.add20(), () => M.bond(), () => M.sub20(), () => M.skip(pick([2, 5, 10]), 50), () => M.word(20, '+'), () => M.pattern(), () => M.word(20, '-'), () => M.add20()],
   [() => M.readNum(), () => M.build(rand(12, 79)), () => M.addTens(), () => M.add2d1d(), () => M.sub2d1d(), () => M.cmpSym(), () => M.skip(pick([5, 10])), () => M.word(50)],
   [() => M.add2d2d(), () => M.add2d1dR(), () => M.sub2d1dR(), () => M.subTens(), () => { const o = rand(0, 6), a = rand(2, 7) * 10 + o; return M.buildSum(a, rand(1, 9 - o)); }, () => M.word(50), () => M.add2d2d(), () => M.cmpSym()],

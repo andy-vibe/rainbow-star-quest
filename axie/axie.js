@@ -27,12 +27,13 @@ const Axie = {
   load(name) {
     if (this.cache[name]) return this.cache[name];
     const [dir, file] = this.LIST[name] || this.ENEMIES[name], p = this.base + dir + file;
+    const text = url => fetch(url).then(r => { if (!r.ok) throw new Error(r.status + ' ' + url); return r.text(); });
     const image = new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('no image ' + p)); i.src = p + '.png'; });
-    return this.cache[name] = Promise.all([fetch(p + '.json').then(r => r.text()), fetch(p + '.atlas.txt').then(r => r.text()), image]).then(([json, atlasText, img]) => {
+    return this.cache[name] = Promise.all([text(p + '.json'), text(p + '.atlas.txt'), image]).then(([json, atlasText, img]) => {
       const atlas = new spine.TextureAtlas(atlasText, () => new spine.canvas.CanvasTexture(img));
       const data = new spine.SkeletonJson(new spine.AtlasAttachmentLoader(atlas)).readSkeletonData(json);
       return { data, mesh: /"type"\s*:\s*"mesh"/.test(json) };   // mesh parts need the slower triangle drawing
-    });
+    }).catch(e => { delete this.cache[name]; throw e; });         // try again next time (the network may be back)
   },
 
   /* draw an Axie on a canvas and keep it moving. Returns a small remote control:
@@ -83,17 +84,19 @@ const Axie = {
         requestAnimationFrame(frame);
       };
       requestAnimationFrame(frame);
-    }).catch(e => { console.error('Axie could not load:', name, e); });
+    }).catch(e => { console.error('Axie could not load:', name, e); if (opts.onFail) opts.onFail(e); });
     return ctl;
   },
 
   /* Any <canvas data-spine="name"> that appears on the page is drawn by itself.
-     Extra settings: data-anim (first move), data-loop, data-idle, data-flip, data-zoom. */
+     Extra settings: data-anim (first move), data-loop, data-idle, data-flip, data-zoom.
+     If the files can not be loaded, the canvas sends a 'spinefail' event (it bubbles). */
   watch() {
     const start = cv => {
       if (cv._ctl) return;
       const d = cv.dataset;
-      cv._ctl = this.mount(d.spine, cv, { start: d.anim || null, loop: d.loop === '1', idle: d.idle || null, flip: d.flip === '1', zoom: +d.zoom || 1 });
+      cv._ctl = this.mount(d.spine, cv, { start: d.anim || null, loop: d.loop === '1', idle: d.idle || null, flip: d.flip === '1', zoom: +d.zoom || 1,
+        onFail: () => cv.dispatchEvent(new CustomEvent('spinefail', { bubbles: true })) });
     };
     const scan = node => { if (node.nodeType !== 1) return; if (node.matches('canvas[data-spine]')) start(node); node.querySelectorAll('canvas[data-spine]').forEach(start); };
     new MutationObserver(list => list.forEach(m => m.addedNodes.forEach(scan))).observe(document.body, { childList: true, subtree: true });

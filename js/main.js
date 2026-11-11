@@ -68,7 +68,7 @@ function floaters(list) {
   }
   return box;
 }
-const backBtn = fn => h('button', { class: 'iconbtn', text: '←', onclick: () => { Snd.tap(); fn(); } });
+const backBtn = fn => h('button', { class: 'iconbtn', text: '←', 'aria-label': 'Back', onclick: () => { Snd.tap(); fn(); } });
 
 /* =============== TITLE =============== */
 function titleScreen() {
@@ -261,7 +261,7 @@ function runQuiz(w, l) {
       missed = true; hearts--; drawBoss(); Snd.grr();
       App.emit('wrong', { boss });
       shoot(bossFace, teamEl, '☁️', () => { teamEl.classList.remove('shake'); void teamEl.offsetWidth; teamEl.classList.add('shake'); });
-      if (hearts <= 0) { over = true; setTimeout(() => failScreen(w, l), 900); }
+      if (hearts <= 0) { over = true; setTimeout(() => { if (heartsEl.isConnected) failScreen(w, l); }, 900); }   // not if the child already left the level
     }
   };
   function next() {
@@ -272,8 +272,8 @@ function runQuiz(w, l) {
     missed = false;
     stones.forEach((d, k) => d.classList.toggle('cur', k === i));
     ptext.textContent = q.prompt;
-    pbtns.replaceChildren(h('button', { class: 'iconbtn small', text: '🔊', title: 'Read it to me', onclick: () => Voice.say(q.say || q.prompt, Wd.host) }));
-    if (q.hear) pbtns.append(h('button', { class: 'iconbtn small', text: '👂', title: 'Hear the answer', onclick: () => Voice.say(q.hear, Wd.host) }));
+    pbtns.replaceChildren(h('button', { class: 'iconbtn small', text: '🔊', title: 'Read it to me', 'aria-label': 'Read it to me', onclick: () => Voice.say(q.say || q.prompt, Wd.host) }));
+    if (q.hear) pbtns.append(h('button', { class: 'iconbtn small', text: '👂', title: 'Hear the answer', 'aria-label': 'Hear the answer', onclick: () => Voice.say(q.hear, Wd.host) }));
     visual.innerHTML = q.visual || '';
     answer.replaceChildren(); fb.replaceChildren(); fb.className = 'feedback';
     Render[q.kind](q, answer, wrong => {
@@ -302,7 +302,7 @@ function runQuiz(w, l) {
   }
   App.screen('play bg-' + Wd.id + (boss ? ' boss' : ''),
     h('div', { class: 'topbar' },
-      h('button', { class: 'iconbtn', text: '✕', onclick: () => { over = true; worldScreen(w); } }), boss ? h('span') : strip, boss ? heartsEl : h('span')),
+      h('button', { class: 'iconbtn', text: '✕', 'aria-label': 'Leave level', onclick: () => { over = true; worldScreen(w); } }), boss ? h('span') : strip, boss ? heartsEl : h('span')),
     bossEl,
     h('div', { class: 'qwrap' },
       h('div', { class: 'promptrow' }, h('div', { class: 'mini', html: draw(Wd.host) }), h('div', { class: 'pbubble' }, ptext, pbtns)),
@@ -337,7 +337,7 @@ function finishLevel(w, l, mistakes, creative) {
   const lvAfter = heroLevel();
   Snd.win(); confetti(stars * 14);
   const after = () => {
-    if (boss && first) {
+    if (boss && !S().seen[Wd.id + '-out']) {   // not "first win": the child may have tapped Play again before Next
       return playScene(Wd.id + '-out', 'bg-' + Wd.id, () => (w === WORLDS.length - 1 ? endingScreen() : mapScreen()));
     }
     worldScreen(w);
@@ -441,10 +441,12 @@ function friendsScreen() {
 function parentGate() {
   const a = rand(6, 9), b = rand(6, 9);
   const inp = h('input', { class: 'nameinput', inputmode: 'numeric', placeholder: '?' });
+  const ok = () => { if (+inp.value === a * b) { ov.remove(); parentScreen(); } else toast('Not quite.'); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
   const ov = h('div', { class: 'overlay', onclick: e => { if (e.target === ov) ov.remove(); } },
     h('div', { class: 'card' }, h('h2', { text: 'For parents' }), h('p', { text: `What is ${a} × ${b}?` }), inp,
       h('div', { class: 'row' }, h('button', { class: 'btn ghost', text: 'Back', onclick: () => ov.remove() }),
-        h('button', { class: 'btn', text: 'OK', onclick: () => { if (+inp.value === a * b) { ov.remove(); parentScreen(); } else toast('Not quite.'); } }))));
+        h('button', { class: 'btn', text: 'OK', onclick: ok }))));
   root.append(ov); inp.focus();
 }
 function parentScreen() {

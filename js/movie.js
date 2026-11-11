@@ -19,7 +19,7 @@ function playScene(id, bg, done) {
   const nameEl = h('div', { class: 'scenename' }), textEl = h('div', { class: 'scenetext' });
   const subEl = h('div', { class: 'msub' + (lines[0][0] === 'fx' ? ' quiet' : '') });
 
-  let i = -1, busy = false, ended = false, clock = 0, typing = null, entered = 0;
+  let i = -1, busy = false, ended = false, clock = 0, typing = null;
   const timers = [];
   const actors = {};
   /* c = the tools every effect can use */
@@ -70,7 +70,6 @@ function playScene(id, bg, done) {
     if (a) return a;
     const on = Object.values(actors), nl = on.filter(x => x.left).length;
     const left = who === 'hero' || who === 'twinkle' ? true : who === 'gloom' || who === 'grumble' || who === 'glow' ? false : nl < on.length - nl;
-    entered++;
     const bob = h('div', { class: 'bob' });
     a = { who, left, el: h('div', { class: 'actor ' + who }, bob), last: 0, redraw(mood) { bob.innerHTML = CAST[who].draw(mood || 'happy', c.stage[who]); } };
     actors[who] = a;
@@ -118,13 +117,13 @@ function playScene(id, bg, done) {
   function show() {
     const L = lines[i];
     if (L[0] === 'fx') return runFx(L[1], L[2], true);
-    const [who, text, mood, fx] = L, str = say(text);
+    const [who, text, mood, fx] = L, str = say(text), fresh = who !== 'narr' && !actors[who];
     subEl.classList.toggle('narr', who === 'narr');
     if (who === 'narr') { talk(null); nameEl.style.display = 'none'; }
     else { const a = enter(who); a.redraw(mood); talk(a); nameEl.textContent = CAST[who].name(); nameEl.style.display = ''; }
     type(str); Voice.say(str, who);
     App.emit('line', { who, c });
-    if (fx) runFx(fx, null, false);
+    if (fx) c.after(fresh ? 700 : 0, () => runFx(fx, null, false));   // an actor who just came in is still off stage: wait for the walk-in
   }
   function advance() { i++; if (i >= lines.length) finish(); else show(); }
   function next() {
@@ -140,7 +139,7 @@ function playScene(id, bg, done) {
 
   subEl.append(h('div', { class: 'bubble', onclick: next }, nameEl, textEl,
     h('div', { class: 'bubblebtns' },
-      h('button', { class: 'iconbtn small', text: '🔊', onclick: e => { e.stopPropagation(); const L = lines[i]; if (L && L[0] !== 'fx') Voice.say(say(L[1]), L[0]); } }),
+      h('button', { class: 'iconbtn small', text: '🔊', 'aria-label': 'Read it to me', onclick: e => { e.stopPropagation(); const L = lines[i]; if (L && L[0] !== 'fx') Voice.say(say(L[1]), L[0]); } }),
       h('button', { class: 'btn', text: 'Next ▶' }))));
   sceneEl.onclick = next;
   App.screen('movie',

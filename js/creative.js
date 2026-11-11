@@ -17,19 +17,21 @@ const Creative = {
     const prompt = opts.prompt || T.prompt;
     let leave = () => {};
     const doneBtn = h('button', { class: 'btn done', text: 'Done ✔', disabled: true });
+    const start = JSON.stringify(App.S.creations[tool] || null);
+    let changed = false;             // Done needs something new: replaying a level must not finish it in one tap
     const api = {
       data: App.S.creations[tool] || null,
-      save(d) { App.S.creations[tool] = d; App.save(); },
-      ready(ok) { doneBtn.disabled = !ok; },
+      save(d) { App.S.creations[tool] = d; App.save(); if (!changed) changed = JSON.stringify(d) !== start; },
+      ready(ok) { doneBtn.disabled = !(ok && changed); },
       onLeave(fn) { leave = fn; },
     };
     const body = h('div', { class: 'cbody ' + tool });
     doneBtn.onclick = () => { leave(); Voice.stop(); Snd.win(); confetti(24); opts.onDone(); };
     App.screen('creative',
       h('div', { class: 'topbar' },
-        h('button', { class: 'iconbtn', text: '←', onclick: () => { leave(); Voice.stop(); opts.onBack(); } }),
+        h('button', { class: 'iconbtn', text: '←', 'aria-label': 'Back', onclick: () => { leave(); Voice.stop(); opts.onBack(); } }),
         h('div', { class: 'cprompt' }, h('span', { text: T.icon + ' ' + prompt }),
-          h('button', { class: 'iconbtn small', text: '🔊', onclick: () => Voice.say(prompt, 'twinkle') })),
+          h('button', { class: 'iconbtn small', text: '🔊', 'aria-label': 'Read it to me', onclick: () => Voice.say(prompt, 'twinkle') })),
         doneBtn),
       body);
     this[tool](body, api);
@@ -55,8 +57,8 @@ const Creative = {
     grid.addEventListener('pointerdown', e => { painting = true; paint(e.target); e.preventDefault(); });
     grid.addEventListener('pointermove', e => { if (painting) paint(document.elementFromPoint(e.clientX, e.clientY)); });
     const stop = () => { if (painting) { painting = false; sync(); } };
-    window.addEventListener('pointerup', stop);
-    api.onLeave(() => window.removeEventListener('pointerup', stop));
+    window.addEventListener('pointerup', stop); window.addEventListener('pointercancel', stop);   // cancel: the system took over the touch
+    api.onLeave(() => { window.removeEventListener('pointerup', stop); window.removeEventListener('pointercancel', stop); });
     els.forEach((el, i) => paintEl(el, cells[i]));
 
     const pal = h('div', { class: 'palette' });
@@ -169,8 +171,8 @@ const Creative = {
             it.x = clamp((e2.clientX - r.left) / r.width * 100, 2, 98); it.y = clamp((e2.clientY - r.top) / r.height * 100, 4, 96);
             el.style.left = it.x + '%'; el.style.top = it.y + '%';
           };
-          const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); sync(); };
-          el.addEventListener('pointermove', move); el.addEventListener('pointerup', up);
+          const up = () => { el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up); el.removeEventListener('pointercancel', up); sync(); };
+          el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);   // cancel: the system took over the touch
         });
         stage.append(el);
       });
