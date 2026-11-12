@@ -1,7 +1,9 @@
 /* Service worker: lets the game open with no internet after the first visit.
    Game files: it tries the network first (so new versions show up), but uses the saved copy when offline
-   or when the network is too slow. The Axie pictures and icons never change, so the saved copy is used first. */
-const CACHE = 'rainbow-star-quest-v6';
+   or when the network is too slow. The Axie pictures and icons never change, so the saved copy is used first.
+   GitHub Pages lets browsers keep files for 10 minutes. Game files skip that browser cache (they are checked
+   with the server every time), so a new version never mixes new and old files. */
+const CACHE = 'rainbow-star-quest-v7';
 const ART_CACHE = 'rainbow-star-quest-art-v1';   // kept across game versions: change it only when the art files change
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',
@@ -27,7 +29,7 @@ const SLOW_MS = 3000;   // after this long without an answer from the network, u
 
 self.addEventListener('install', e => {
   e.waitUntil(Promise.all([
-    caches.open(CACHE).then(c => c.addAll(FILES)),   // the game itself must be saved completely
+    caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))),   // the game itself must be saved completely, fresh from the server
     /* pictures one by one: a picture that fails to download must not stop offline play; it is saved when next shown */
     caches.open(ART_CACHE).then(c => Promise.all(ART.map(f => c.match(f).then(hit => hit || c.add(f).catch(() => {}))))),
   ]).then(() => self.skipWaiting()));
@@ -37,7 +39,7 @@ self.addEventListener('activate', e => {
 });
 
 const saved = req => caches.match(req, { ignoreSearch: true });
-const fetchAndSave = (req, cache) => fetch(req).then(res => {
+const fetchAndSave = (req, cache, fresh) => fetch(fresh ? new Request(req.url, { cache: 'no-cache' }) : req).then(res => {
   if (res.ok) { const copy = res.clone(); caches.open(cache).then(c => c.put(req, copy)); }
   return res;
 });
@@ -48,7 +50,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(saved(req).then(hit => hit || fetchAndSave(req, ART_CACHE)));
     return;
   }
-  const net = fetchAndSave(req, CACHE);
+  const net = fetchAndSave(req, CACHE, true);
   const slow = new Promise(r => setTimeout(r, SLOW_MS)).then(() => saved(req)).then(hit => hit || net);
   e.respondWith(Promise.race([net, slow]).catch(() => saved(req).then(hit =>
     hit || (req.mode === 'navigate' ? caches.match('index.html') : Response.error()))));
