@@ -36,6 +36,7 @@
     ['Noisy Koi Wolf', 'It is show time. Sing the koi wolf happy!'],
     ['Sneaky Flower Treant', 'This flower treant hides in the meadow. Cheer it up!'],
     [BOSS, BOSS + ' has the last shard. Show her what friends can do!'],
+    ['Stormy', 'Stormy rumbles in the clouds. Cheer Stormy up!'],
   ];
   WORLDS.forEach((W, w) => {
     W.name = fix(W.name);

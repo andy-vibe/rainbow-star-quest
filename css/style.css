@@ -21,6 +21,7 @@ h1, h2, h4, p { margin: 0; }
 .bg-star { background: linear-gradient(#2b1d52, #6b3fa0 70%, #ff6fb1); --ink: #fff; }
 .bg-meadow { background: linear-gradient(#ffd9ec, #fff6d6 60%, #cdf2c0); }
 .bg-castle { background: linear-gradient(#1c1638, #3b2a7a 70%, #7a4bb5); --ink: #fff; }
+.bg-sky { background: linear-gradient(#8fd0ff, #cfeeff 60%, #fff6fb); }
 
 .floaters { position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none; overflow: hidden; }
 .floaters span { position: absolute; top: -8%; opacity: .75; animation: fall linear infinite; }
@@ -118,14 +119,17 @@ h1, h2, h4, p { margin: 0; }
 .navbtn { background: #fff; border-radius: 18px; padding: 6px 10px; font-size: 24px; box-shadow: 0 4px 0 rgba(0, 0, 0, .12); min-width: 62px; }
 .navbtn small { display: block; font-size: 12px; font-weight: 800; }
 .maptitle { font-size: clamp(22px, 3.6vw, 34px); }
-.worlds { display: flex; flex-wrap: wrap; justify-content: center; gap: clamp(10px, 1.6vw, 18px); max-width: 1100px; }
-.worldcard { position: relative; width: clamp(150px, 18vw, 196px); border-radius: 28px; border: 5px solid #fff; padding: 12px 8px 14px; box-shadow: 0 8px 0 rgba(60, 30, 100, .22);
+.worlds { display: grid; grid-template-columns: repeat(6, auto); justify-content: center; gap: clamp(10px, 1.6vw, 18px); }
+.worldcard { position: relative; width: clamp(140px, 14.6vw, 190px); border-radius: 28px; border: 5px solid #fff; padding: 12px 8px 14px; box-shadow: 0 8px 0 rgba(60, 30, 100, .22);
   display: flex; flex-direction: column; align-items: center; gap: 2px; color: var(--ink, #3b2a4a); transition: transform .12s; }
 .worldcard:hover { transform: translateY(-4px); }
 .worldcard b { font-size: clamp(17px, 2.2vw, 21px); } .worldcard small { font-weight: 800; font-size: 15px; }
 .wemoji { font-size: 34px; } .whost { width: 110px; height: 140px; }
 .worldcard.locked { filter: grayscale(.85); opacity: .75; }
 .shard { position: absolute; top: 6px; right: 10px; animation: pulse 1.5s infinite; }
+.shard.wide { width: 46px; } .rainbowsvg { display: block; width: 100%; height: 100%; }
+@media (max-width: 940px) { .worlds { grid-template-columns: repeat(3, auto); } .worldcard { width: clamp(140px, 26vw, 190px); } }
+@media (max-width: 480px) { .worlds { grid-template-columns: repeat(2, auto); } .worldcard { width: 44vw; } }
 
 /* ---------- one world ---------- */
 .path { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px clamp(12px, 2vw, 22px); max-width: 900px; margin-top: 2vh; }
@@ -174,6 +178,8 @@ h1, h2, h4, p { margin: 0; }
 .eqvis { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
 .eqvis > b { font-size: 40px; }
 .eqvis .col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.groups { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.groups .emojigrid { border: 3px dashed #b9a6ec; border-radius: 16px; padding: 4px 8px; }
 
 .opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; width: 100%; }
 .opt { min-width: 110px; padding: 12px 22px; background: #fff; border: 4px solid #d8c8ff; border-radius: 22px; font-weight: 800; font-size: clamp(22px, 3.2vw, 32px); box-shadow: 0 6px 0 #c9b6f5; transition: transform .08s; }
@@ -300,6 +306,8 @@ h1, h2, h4, p { margin: 0; }
 .stickers { display: flex; flex-wrap: wrap; gap: 2px; justify-content: center; background: #fff; border-radius: 20px; padding: 8px; max-width: 1000px; }
 .stickers button { font-size: 30px; width: 48px; height: 48px; border-radius: 12px; }
 .stickers button:active { background: #ffe3f1; }
+.paintpic { width: min(100%, 520px, calc(100dvh - 300px)); min-width: 260px; aspect-ratio: 1; border: 5px solid #fff; border-radius: 22px; overflow: hidden; box-shadow: 0 8px 20px rgba(60, 30, 100, .2); }
+.paintpic svg { display: block; width: 100%; height: 100%; cursor: pointer; }
 
 @media (max-width: 700px) {
   .map .topbar { flex-wrap: wrap; justify-content: center; }
@@ -345,6 +353,7 @@ h1, h2, h4, p { margin: 0; }
 #app.movie > .mscene { flex: 1 1 0; min-height: 0; position: relative; overflow: hidden; cursor: pointer; }
 .mbg { position: absolute; inset: 0; transition: filter 2s; }
 .mbg.grey { filter: grayscale(.95) brightness(.78); }
+.mbg.stormy { filter: brightness(.55) saturate(.7); }
 .mbg.dawn { opacity: 0; transition: opacity 1.8s; } .mbg.dawn.on { opacity: 1; }
 .mbg .scenery { position: absolute; left: 0; bottom: 0; width: 100%; height: 74%; display: block; }
 .actors { position: absolute; left: 0; right: 0; top: 0; bottom: 2%; display: flex; align-items: flex-end; justify-content: center; gap: clamp(2px, 2.5vw, 36px); padding: 0 10px; pointer-events: none; }
@@ -363,6 +372,7 @@ h1, h2, h4, p { margin: 0; }
   -webkit-mask: radial-gradient(circle, #000 8%, transparent 68%); mask: radial-gradient(circle, #000 8%, transparent 68%); animation: spin 16s linear infinite; }
 .fxi.shard { width: min(17vw, 14vh); aspect-ratio: 100 / 124; filter: drop-shadow(0 0 12px #fff); }
 .fxi.bossgloom { width: min(40vw, 30vh); aspect-ratio: 200 / 280; }
+.fxi.rainbow { width: min(86vw, 90vh); aspect-ratio: 200 / 116; }
 .fxi.minigloom { width: min(15vw, 13vh); aspect-ratio: 200 / 280; }
 .fxi.emo { font-size: clamp(22px, 4.6vh, 42px); line-height: 1; }
 .fxi.emo.big { font-size: clamp(44px, 9vh, 84px); }

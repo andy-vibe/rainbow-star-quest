@@ -132,6 +132,38 @@ Art.mochi = function (stage = 1, mood = 'happy') {
   `);
 };
 
+/* Sora: a little sky dragon who is learning to fly */
+Art.sora = function (stage = 1, mood = 'happy') {
+  const B = '#8fd3ff', D = '#4fa9e0';
+  /* one wing, drawn for the left side; big rainbow wings when she has grown */
+  const wingPath = 'M0,0 Q-40,-70 -86,-52 Q-70,-36 -74,-22 Q-58,-20 -56,-4 Q-34,-6 0,14 Z';
+  const layers = stage > 1 ? [[0.8, '#ff9fc8'], [0.6, '#ffe58a'], [0.42, '#a6f0c6']] : [[0.5, '#cdeeff']];
+  const wing = layers.map(([s, c]) => `<path d="${wingPath}" transform="scale(${s})" fill="${c}" stroke="${D}" stroke-width="${3 / s}" stroke-linejoin="round"/>`).join('');
+  const wings = `<g transform="translate(70,176)">${wing}</g><g transform="translate(130,176) scale(-1,1)">${wing}</g>`;
+  const mouth = mood === 'sad' ? `<path d="M90,142 Q100,134 110,142" stroke="#b5654a" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : `<path d="M90,136 Q100,146 110,136" stroke="#b5654a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const scarf = stage > 1 ? `<path d="M62,152 Q100,170 138,152 L140,164 Q100,184 60,164 Z" fill="#ff7eb6"/><path d="M61,158 Q100,177 139,158" stroke="#ffe58a" stroke-width="4" fill="none"/><text x="146" y="58" font-size="24">✨</text>` : '';
+  return svgWrap(`
+    ${wings}
+    <path d="M136,222 Q182,232 184,192 L196,182 L182,178 Q170,206 134,204 Z" fill="${B}" stroke="${D}" stroke-width="3" stroke-linejoin="round"/>
+    <ellipse cx="100" cy="204" rx="44" ry="42" fill="${B}" stroke="${D}" stroke-width="3"/>
+    <ellipse cx="100" cy="212" rx="27" ry="30" fill="#fff3c4"/>
+    <path d="M82,198 h36 M78,212 h44 M82,226 h36" stroke="#f0d78a" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="78" cy="246" rx="17" ry="10" fill="${B}" stroke="${D}" stroke-width="3"/><ellipse cx="122" cy="246" rx="17" ry="10" fill="${B}" stroke="${D}" stroke-width="3"/>
+    <ellipse cx="60" cy="196" rx="9" ry="14" fill="${B}" stroke="${D}" stroke-width="3" transform="rotate(20 60 196)"/><ellipse cx="140" cy="196" rx="9" ry="14" fill="${B}" stroke="${D}" stroke-width="3" transform="rotate(-20 140 196)"/>
+    <path d="M68,60 L58,20 L88,50 Z M132,60 L142,20 L112,50 Z" fill="#ffe58a" stroke="#e0b84a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M86,52 L94,30 L102,48 L110,32 L116,54 Z" fill="#ff9fc8" stroke="#e57aa8" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="100" cy="102" rx="66" ry="56" fill="${B}" stroke="${D}" stroke-width="3"/>
+    <ellipse cx="100" cy="128" rx="30" ry="19" fill="#c4ecff"/>
+    <circle cx="91" cy="122" r="2.6" fill="${D}"/><circle cx="109" cy="122" r="2.6" fill="${D}"/>
+    <ellipse cx="52" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/><ellipse cx="148" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/>
+    ${eyesG(`<ellipse cx="72" cy="96" rx="8.5" ry="11" fill="#3b2a4a"/><ellipse cx="128" cy="96" rx="8.5" ry="11" fill="#3b2a4a"/>
+    <circle cx="75" cy="91" r="3.6" fill="#fff"/><circle cx="131" cy="91" r="3.6" fill="#fff"/>`)}
+    ${mouth}
+    ${scarf}
+  `);
+};
+
 /* Twinkle: a little piece of the Rainbow Star */
 Art.twinkle = (mood = 'happy') => svgWrap(`
   <circle cx="100" cy="130" r="92" fill="#fff6b0" opacity=".45"/>
@@ -142,28 +174,35 @@ Art.twinkle = (mood = 'happy') => svgWrap(`
   ${mood === 'sad' ? '<path d="M90,154 Q100,146 110,154" stroke="#b5654a" stroke-width="3.5" fill="none" stroke-linecap="round"/>' : '<path d="M88,146 Q100,160 112,146" stroke="#b5654a" stroke-width="3.5" fill="none" stroke-linecap="round"/>'}
 `);
 
-/* Gloom: a grumpy shadow puff. mood 0 = grumpy and grey, 1 = happy and bright. */
+/* Gloom: a grumpy shadow puff. mood 0 = grumpy and grey, 1 = happy and bright.
+   king: wears a crown. storm: a storm cloud with lightning, that makes a rainbow when happy. */
 Art.gloom = function (o) {
-  o = Object.assign({ mood: 0, king: false }, o);
+  o = Object.assign({ mood: 0, king: false, storm: false }, o);
   const m = clamp(o.mood, 0, 1);
-  const body = lerpColor('#5d4f73', '#ffc94d', m), dark = lerpColor('#463a59', '#f59e0b', m);
+  const body = o.storm ? lerpColor('#5a6688', '#eef6ff', m) : lerpColor('#5d4f73', '#ffc94d', m);
+  const dark = o.storm ? lerpColor('#3e4866', '#9cc6ec', m) : lerpColor('#463a59', '#f59e0b', m);
   const my = 176 + (m - 0.5) * 30;            // mouth curve: frown -> smile
   const brow = (1 - m) * 12;
   const crown = o.king ? `<path d="M62,60 L68,22 L86,44 L100,14 L114,44 L132,22 L138,60 Z" fill="#ffd54a" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="46" r="6" fill="#b388ff"/>` : '';
   const cheeks = m > 0.6 ? `<ellipse cx="58" cy="150" rx="11" ry="6" fill="#ff9bb0" opacity=".7"/><ellipse cx="142" cy="150" rx="11" ry="6" fill="#ff9bb0" opacity=".7"/>` : '';
   const glow = m > 0.6 ? `<circle cx="100" cy="140" r="96" fill="#fff3a8" opacity=".5"/>` : '';
+  const happyBow = o.storm && m > 0.6 ? ['#ff7eb6', '#ffd54a', '#5fd38d', '#4aa8ff'].map((c, k) => `<path d="M${30 + k * 9},72 A${70 - k * 9},${64 - k * 9} 0 0 1 ${170 - k * 9},72" stroke="${c}" stroke-width="9" fill="none"/>`).join('') : '';
+  const puffs = o.storm ? `<circle cx="62" cy="80" r="30" fill="${body}" stroke="${dark}" stroke-width="5"/><circle cx="100" cy="60" r="36" fill="${body}" stroke="${dark}" stroke-width="5"/><circle cx="140" cy="80" r="30" fill="${body}" stroke="${dark}" stroke-width="5"/>` : '';
+  const antennas = o.storm ? '' : `<path d="M56,74 Q44,50 60,40 M144,74 Q156,50 140,40" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="60" cy="38" r="6" fill="${m > 0.6 ? '#ff7eb6' : dark}"/><circle cx="140" cy="38" r="6" fill="${m > 0.6 ? '#7fd4f5' : dark}"/>`;
+  const thunder = o.storm && m < 0.6 ? `<g opacity="${(1 - m).toFixed(2)}"><path d="M150,14 L178,14 L164,42 L184,42 L146,92 L156,56 L138,56 Z" fill="#ffd54a" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/>
+    ${[56, 86, 116, 146].map((x, k) => `<path d="M${x},${240 + (k % 2) * 8} l-6,14" stroke="#7cc8f2" stroke-width="5" stroke-linecap="round"/>`).join('')}</g>` : '';
   return svgWrap(`
-    ${glow}
+    ${glow}${happyBow}${puffs}
     <path d="M32,160 Q22,60 100,52 Q178,60 168,160 Q174,214 146,204 Q132,232 114,208 Q100,236 86,208 Q68,232 54,204 Q26,214 32,160Z" fill="${body}" stroke="${dark}" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M56,74 Q44,50 60,40 M144,74 Q156,50 140,40" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
-    <circle cx="60" cy="38" r="6" fill="${m > 0.6 ? '#ff7eb6' : dark}"/><circle cx="140" cy="38" r="6" fill="${m > 0.6 ? '#7fd4f5' : dark}"/>
+    ${antennas}
     ${eyesG(`<ellipse cx="76" cy="124" rx="16" ry="18" fill="#fff"/><ellipse cx="124" cy="124" rx="16" ry="18" fill="#fff"/>
     <circle cx="79" cy="128" r="8" fill="#2b2140"/><circle cx="121" cy="128" r="8" fill="#2b2140"/>
     <circle cx="82" cy="124" r="3" fill="#fff"/><circle cx="124" cy="124" r="3" fill="#fff"/>`)}
     <path d="M54,${100 - brow} L94,${100 + brow}" stroke="${dark}" stroke-width="7" stroke-linecap="round"/>
     <path d="M146,${100 - brow} L106,${100 + brow}" stroke="${dark}" stroke-width="7" stroke-linecap="round"/>
     <path d="M78,170 Q100,${my} 122,170" stroke="#2b2140" stroke-width="5" fill="none" stroke-linecap="round"/>
-    ${cheeks}${crown}
+    ${cheeks}${crown}${thunder}
   `);
 };
 
@@ -191,6 +230,15 @@ Art.star5 = function (filled, face) {
   }
   const f = face && filled.every(Boolean) ? `<g class="starface">${eyesG('<ellipse cx="86" cy="100" rx="6" ry="9" fill="#3b2a4a"/><ellipse cx="114" cy="100" rx="6" ry="9" fill="#3b2a4a"/><circle cx="88" cy="96" r="2.5" fill="#fff"/><circle cx="116" cy="96" r="2.5" fill="#fff"/>')}<path d="M90,116 Q100,127 110,116" stroke="#3b2a4a" stroke-width="3.5" fill="none" stroke-linecap="round"/></g>` : '';
   return `<svg class="star5" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">${segs}${f}</svg>`;
+};
+/* a rainbow with a cloud at each end */
+Art.rainbow = function () {
+  const arcs = ['#ff5f6d', '#ff9f43', '#ffd54a', '#5fd38d', '#4aa8ff', '#8e6bff'].map((c, k) => {
+    const r = 92 - k * 9;
+    return `<path d="M${100 - r},100 A${r},${r} 0 0 1 ${100 + r},100" stroke="${c}" stroke-width="9.5" fill="none"/>`;
+  }).join('');
+  const cloud = x => `<g fill="#fff"><circle cx="${x - 10}" cy="100" r="13"/><circle cx="${x + 6}" cy="94" r="16"/><circle cx="${x + 17}" cy="103" r="11"/><rect x="${x - 22}" y="100" width="50" height="14" rx="7"/></g>`;
+  return `<svg class="rainbowsvg" viewBox="0 0 200 116" xmlns="http://www.w3.org/2000/svg">${arcs}${cloud(16)}${cloud(178)}</svg>`;
 };
 
 /* ---------- Scenery for each world (drawn at the bottom of a scene) ---------- */
@@ -233,6 +281,15 @@ Art.scenery = function (id) {
     for (let i = 0; i < 6; i++) s += R(384 + i * 40, 178, 22, 14, '#130e2b');
     s += [[370, 190], [614, 190], [491, 150], [430, 250], [550, 250]].map(([x, y]) => R(x, y, 16, 24, '#ffd54a', 'rx="8"')).join('');
     s += `<path d="M476,360 v-50 a24,24 0 0 1 48,0 v50Z" fill="#0b0820"/><path d="M0,420 L0,372 Q500,345 1000,372 L1000,420Z" fill="#1a1338"/>`;
+  } else if (id === 'sky') {
+    ['#ff8fa3', '#ffc078', '#ffe58a', '#a6e3a1', '#8fd3ff', '#c3a6ff'].forEach((c, k) => { const r = 330 - k * 16; s += `<path d="M${180 - r},420 A${r},${r} 0 0 1 ${180 + r},420" stroke="${c}" stroke-width="16" fill="none" opacity=".7"/>`; });
+    for (const [x, y, k] of [[300, 70, 1], [560, 46, 0.7], [930, 60, 0.9]]) s += `<ellipse cx="${x}" cy="${y}" rx="${70 * k}" ry="${22 * k}" fill="#fff" opacity=".85"/><ellipse cx="${x - 16 * k}" cy="${y - 14 * k}" rx="${34 * k}" ry="${22 * k}" fill="#fff" opacity=".85"/>`;
+    const isle = (x, y, w) => `<path d="M${x - w / 2},${y} Q${x - w / 4},${y + w * 0.5} ${x},${y + w * 0.8} Q${x + w / 4},${y + w * 0.5} ${x + w / 2},${y} Z" fill="#b08968"/><ellipse cx="${x}" cy="${y}" rx="${w / 2 + 6}" ry="${w * 0.12}" fill="#7ed37a"/>`;
+    s += isle(640, 220, 160) + isle(870, 150, 110) + isle(440, 150, 80);
+    s += R(612, 172, 52, 40, '#fff3e0') + `<path d="M604,176 L638,142 L672,176Z" fill="#8fd3ff"/>` + R(630, 190, 14, 22, '#c98a5a');
+    s += R(866, 112, 8, 30, '#8a5a34') + `<circle cx="870" cy="104" r="20" fill="#5fc27a"/>` + `<circle cx="440" cy="132" r="9" fill="#ff7eb6"/><circle cx="426" cy="138" r="7" fill="#ffd54a"/>`;
+    for (let i = 0; i < 9; i++) s += `<circle cx="${i * 125 + 30}" cy="${380 - (i % 2) * 12}" r="${70 + (i % 3) * 12}" fill="#e6f3ff"/>`;
+    for (let i = 0; i < 13; i++) s += `<circle cx="${i * 85}" cy="${402 + (i % 3) * 8}" r="${52 + (i % 2) * 14}" fill="#fff"/>`;
   } else {
     s += `<ellipse cx="200" cy="440" rx="430" ry="160" fill="#a9e2c0"/><ellipse cx="780" cy="450" rx="480" ry="180" fill="#bfe6a8"/><path d="M0,420 L0,376 Q500,340 1000,376 L1000,420Z" fill="#9bd98a"/>`;
     for (const [x, c] of [[300, '#ff8fb8'], [372, '#7cc8f2'], [650, '#ffd54a']]) s += R(x, 322, 52, 42, '#fff3e0') + `<path d="M${x - 8},326 L${x + 26},292 L${x + 60},326Z" fill="${c}"/>` + R(x + 20, 342, 12, 22, '#c98a5a');

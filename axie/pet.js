@@ -124,6 +124,7 @@
     gloomsfly: 'battle/get-debuff', crack: 'defense/hit-by-normal-crit', towerdown: 'defense/hit-by-normal', magicoops: 'defense/hit-by-ranged-attack',
     snowburst: 'battle/get-buff', notes: 'activity/prepare', notesdrop: 'battle/get-debuff', questions: 'action/idle/random-02',
     towerup: 'action/idle/random-03', powerup: 'battle/get-buff', starjoin: 'activity/evolve', glows: 'activity/prepare', party: 'activity/evolve',
+    thunder: 'defense/hit-by-normal-crit', flapfail: 'battle/get-debuff', fly: 'activity/prepare', rainbow: 'battle/get-buff', calm: 'battle/get-buff',
   };
   App.on('scene', ({ id, c }) => { if (id !== 'intro') joinScene(c); });        // in the intro it arrives with the hero
   App.on('line', ({ who, c }) => { if (who === 'hero') joinScene(c); });
@@ -159,7 +160,7 @@
   App.on('level', ({ w, boss }) => {
     world = w;
     const face = boss && document.querySelector('.bossface');
-    if (face) face.innerHTML = Art.gloom({ mood: 0, king: w === 4 });       // the first face was drawn before we knew the world
+    if (face) face.innerHTML = gloomOf(w, 0);       // the first face was drawn before we knew the world
   });
   App.on('right', e => { if (e.boss) lastRight = Date.now(); });             // the next face the game draws starts with a "hit" move
   App.on('wrong', e => {

@@ -81,6 +81,12 @@ const W = {
     return { key: 'o' + a, subj: 'words', kind: 'choice', prompt: `What is the opposite of "${a}"?`,
       visual: `<div class="bigword">${a}</div>`, options: wordChoices(b, [pick(three[1]), pick(three[2])]), after: `${a}, ${b}` };
   },
+  compound() {
+    const [a, b, e, w1, w2] = pick(COMPOUNDS);
+    return { key: 'w' + a + b, subj: 'words', kind: 'choice', prompt: `Put two words together. "${a}" and what make this picture?`,
+      visual: `<div class="bigpic">${e}</div><div class="bigword">${a} + <span class="gap">?</span></div><div class="hintline">Two small words can make one big word.</div>`,
+      options: wordChoices(b, [w1, w2]), after: `${a} + ${b} = ${a}${b}` };
+  },
 };
 Gen.words = tier => fill([
   [() => W.spell(3), () => W.match([3]), () => W.spell(3), () => W.missing(3), () => W.spell(3), () => W.match([3, 4]), () => W.spell(3), () => W.missing(3)],
@@ -88,6 +94,7 @@ Gen.words = tier => fill([
   [() => W.spell(5), () => W.rhyme(), () => W.opposite(), () => W.spell(5, 1), () => W.missing(5), () => W.match([5, 6]), () => W.spell(5, 2), () => W.opposite()],
   [() => W.spell(6), () => W.opposite(), () => W.missing(6), () => W.spell(6, 1), () => W.rhyme(), () => W.spell(5, 2), () => W.spell(6, 2), () => W.match([6, 7])],
   [() => W.spell(7), () => W.opposite(), () => W.spell(6, 2), () => W.missing(7), () => W.spell(7, 1), () => W.rhyme(), () => W.spell(7, 2), () => W.spell(6, 2)],
+  [() => W.spell(8), () => W.compound(), () => W.missing(8), () => W.spell(7, 2), () => W.opposite(), () => W.compound(), () => W.spell(8, 1), () => W.match([7, 8])],
 ][tier - 1]);
 
 /* run each maker; try again if we already have the same question */
@@ -136,11 +143,12 @@ Gen.sentences = tier => fill([
   [() => S_.order(3), () => S_.blank('mid'), () => S_.punct(), () => S_.order(3), () => S_.blank('mid'), () => S_.punct(), () => S_.order(3)],
   [() => S_.order(4), () => S_.blank('hard'), () => S_.punct(), () => S_.order(4), () => S_.blank('mid'), () => S_.order(4), () => S_.blank('hard')],
   [() => S_.order(5), () => S_.blank('hard'), () => S_.order(5), () => S_.punct(), () => S_.blank('hard'), () => S_.order(5), () => S_.order(5)],
+  [() => S_.order(6), () => S_.blank('top'), () => S_.punct(), () => S_.order(6), () => S_.blank('top'), () => S_.order(6), () => S_.blank('hard')],
 ][tier - 1]);
 
 /* ================= MATH ================= */
 const THINGS = [['🍪', 'cookies'], ['⭐', 'stars'], ['🧊', 'ice blocks'], ['🎈', 'balloons'], ['🐟', 'fish'], ['💎', 'gems'], ['🌸', 'flowers'], ['🧱', 'bricks']];
-const NAMES = ['Lumi', 'Pix', 'Nova', 'Mochi'];
+const NAMES = ['Lumi', 'Pix', 'Nova', 'Mochi', 'Sora'];
 const M = {
   count(max) {
     const n = rand(Math.max(3, max - 9), max), e = pick(THINGS)[0];
@@ -223,6 +231,22 @@ const M = {
     return { key: `${a}?${c}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `${a} plus what makes ${c}?`,
       visual: `<div class="eqvis">${cubes(a, 'c1')}<b>+</b><b class="qm">?</b><b>=</b>${cubes(c, 'c3')}</div>${eq(`${a} + ? = ${c}`)}`, options: numChoices(c - a) };
   },
+  /* equal groups: the first step to times tables */
+  groups() {
+    const g = rand(2, 5), n = rand(2, 5), [e, thing] = pick(THINGS);
+    return { key: `g${g}x${n}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `${g} groups of ${n} ${thing}. How many in all?`,
+      visual: `<div class="groups">${Array.from({ length: g }, () => emojis(e, n)).join('')}</div>${eq(Array(g).fill(n).join(' + ') + ' = ?')}`,
+      options: numChoices(g * n), after: `${g} groups of ${n} make ${g * n}.` };
+  },
+  double() {
+    const a = rand(6, 25);
+    return Object.assign(M.add(a, a), { key: 'd' + a, prompt: `What is double ${a}? Double means two times the same number.` });
+  },
+  half() {
+    const n = rand(2, 10) * 2, [e, thing] = pick(THINGS);
+    return { key: 'h' + n, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `Share ${n} ${thing} fairly between 2 friends. How many does each friend get?`,
+      visual: emojis(e, n) + '<div class="hintline">Fair means both friends get the same.</div>', options: numChoices(n / 2), after: `Half of ${n} is ${n / 2}.` };
+  },
   /* number makers */
   add10: () => { const a = rand(1, 8); return M.add(a, rand(1, 10 - a)); },
   sub10: () => { const a = rand(3, 10); return M.sub(a, rand(1, a - 1)); },
@@ -237,6 +261,7 @@ const M = {
   sub2d1dR: () => { const o = rand(0, 7), a = rand(2, 9) * 10 + o; return M.sub(a, rand(o + 1, 9)); },
   add2d2dR: () => { const o1 = rand(3, 9), o2 = rand(10 - o1, 9), t1 = rand(1, 6), t2 = rand(1, 8 - t1); return M.add(t1 * 10 + o1, t2 * 10 + o2); },
   sub2d2d: () => { const a = rand(35, 99); return M.sub(a, rand(11, a - 10)); },
+  sub2d2dR: () => { const o1 = rand(0, 7), o2 = rand(o1 + 1, 9), t1 = rand(3, 9), t2 = rand(1, t1 - 1); return M.sub(t1 * 10 + o1, t2 * 10 + o2); },
 };
 Gen.math = tier => fill([
   [() => M.count(10), () => M.add10(), () => M.count(20), () => M.add10(), () => M.pattern(), () => M.sub10(), () => M.compare(9), () => M.sub10()],   // compare: 10 would be drawn as a ten-stick, taught later
@@ -244,6 +269,7 @@ Gen.math = tier => fill([
   [() => M.readNum(), () => M.build(rand(12, 79)), () => M.addTens(), () => M.add2d1d(), () => M.sub2d1d(), () => M.cmpSym(), () => M.skip(pick([5, 10])), () => M.word(50)],
   [() => M.add2d2d(), () => M.add2d1dR(), () => M.sub2d1dR(), () => M.subTens(), () => { const o = rand(0, 6), a = rand(2, 7) * 10 + o; return M.buildSum(a, rand(1, 9 - o)); }, () => M.word(50), () => M.add2d2d(), () => M.cmpSym()],
   [() => M.add2d2dR(), () => M.sub2d2d(), () => M.missing(), () => M.word(100), () => { const t1 = rand(1, 5), o1 = rand(1, 7); return M.buildSum(t1 * 10 + o1, rand(1, 8 - t1) * 10 + rand(1, 9 - o1)); }, () => M.add2d2dR(), () => M.sub2d2d(), () => M.skip(pick([-10, -5, -2]))],
+  [() => M.groups(), () => M.add2d2dR(), () => M.double(), () => M.sub2d2dR(), () => M.half(), () => M.groups(), () => M.skip(pick([3, 4]), 40), () => M.word(100)],
 ][tier - 1]);
 
 /* ================= SCIENCE ================= */

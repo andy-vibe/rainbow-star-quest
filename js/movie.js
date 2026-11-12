@@ -69,14 +69,14 @@ function playScene(id, bg, done) {
     let a = actors[who];
     if (a) return a;
     const on = Object.values(actors), nl = on.filter(x => x.left).length;
-    const left = who === 'hero' || who === 'twinkle' ? true : who === 'gloom' || who === 'grumble' || who === 'glow' ? false : nl < on.length - nl;
+    const left = who === 'hero' || who === 'twinkle' ? true : BADDIES.includes(who) || who === 'glow' ? false : nl < on.length - nl;
     const bob = h('div', { class: 'bob' });
     a = { who, left, el: h('div', { class: 'actor ' + who }, bob), last: 0, redraw(mood) { bob.innerHTML = CAST[who].draw(mood || 'happy', c.stage[who]); } };
     actors[who] = a;
     left ? actorsEl.prepend(a.el) : actorsEl.append(a.el);
     const all = Object.values(actors);
     if (all.length > 3) leave(all.filter(x => x !== a).sort((x, y) => x.last - y.last)[0]);
-    how = how || (who === 'gloom' || who === 'grumble' ? 'stomp' : 'walk');
+    how = how || (BADDIES.includes(who) ? 'stomp' : 'walk');
     if (how === 'walk') { anim(a.el, [{ translate: (left ? '-70vw' : '70vw') + ' 0' }, { translate: '0 -6%', offset: 0.8 }, { translate: '0 0' }], { duration: 550, easing: 'ease-out' }); Snd.whoosh(); }
     else {
       anim(a.el, [{ translate: '0 -90vh' }, { translate: '0 0', offset: 0.6 }, { translate: '0 -9%', offset: 0.8 }, { translate: '0 0' }], { duration: how === 'stomp' ? 650 : 900, easing: 'ease-in' });
@@ -148,6 +148,7 @@ function playScene(id, bg, done) {
   App.emit('scene', { id, c });
   advance();
 }
+const BADDIES = ['gloom', 'grumble', 'stormy'];   // they come in from the right, with a stomp
 
 /* ================= SPECIAL EFFECTS =================
    Each one gets the scene tools (c) and returns how long it takes, in milliseconds. */
@@ -235,13 +236,68 @@ const FX = {
   },
   questions(c) { c.spray(['❓', '❔', '❓'], c.pos('mochi'), 8, { up: true, dist: 190, ms: 1500, gap: 110 }); [660, 880, 660, 990].forEach((f, k) => Snd.tone(f, 0.1, 'sine', 0.1, k * 0.13)); return 1200; },
 
+  /* ---- Sky Islands ---- */
+  /* rain falls over the whole scene */
+  rain(c) {
+    for (let k = 0; k < 24; k++) {
+      const e = c.add('💧', { left: rand(2, 98) + '%', top: '-6%' }, 'emo');
+      anim(e.in, [{ transform: 'translateY(0)', opacity: 0.9 }, { transform: 'translateY(105vh)', opacity: 0.9 }], { duration: 1100, delay: k * 60, easing: 'ease-in', fill: 'both' });
+      setTimeout(() => e.remove(), 1100 + k * 60);
+    }
+    Snd.noise(1.2, 0.08);
+    return 1600;
+  },
+  /* the sky goes dark, lightning flashes, thunder booms */
+  thunder(c) {
+    c.bg.classList.add('stormy');
+    if (c.props.rainbow) { anim(c.props.rainbow, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }); c.after(500, () => { c.props.rainbow.remove(); c.props.rainbow = null; }); }
+    c.after(500, () => { c.flash(); c.shake(700); c.text('BOOM!'); Snd.crash(); Snd.grr(); });
+    c.after(900, () => FX.rain(c));
+    return 2200;
+  },
+  /* Sora flaps and flaps, goes up a little... and falls down */
+  flapfail(c) {
+    const a = c.actor('sora'); if (!a) return 0;
+    anim(a.el, [{ translate: '0 0' }, { translate: '0 -14%', offset: 0.3 }, { translate: '0 -8%', offset: 0.45 }, { translate: '0 -18%', offset: 0.6 }, { translate: '0 0', offset: 0.8 }, { translate: '0 0' }], { duration: 1400, easing: 'ease-in-out' });
+    [0, 250, 500, 750].forEach(d => c.after(d, () => Snd.sweep(500, 800, 0.12, 'sine', 0.08)));
+    c.spray(['💨', '🪶'], c.pos('sora'), 6, { dist: 120, ms: 900, gap: 120 });
+    c.after(1100, () => { Snd.thud(); c.shake(300); c.text('BONK!'); });
+    return 1600;
+  },
+  /* Sora flies up high and comes back down */
+  fly(c) {
+    const a = c.actor('sora'); if (!a) return 0;
+    anim(a.el, [{ translate: '0 0' }, { translate: '0 -45%', offset: 0.4 }, { translate: '0 -38%', offset: 0.6 }, { translate: '0 0' }], { duration: 1700, easing: 'ease-in-out' });
+    Snd.whoosh(); c.after(500, () => Snd.sparkle());
+    c.after(500, () => c.spray(['✨', '🌈', '☁️'], c.pos('sora'), 12, { dist: 220, ms: 1300 }));
+    return 1800;
+  },
+  /* a rainbow grows across the sky, from left to right */
+  rainbow(c) {
+    c.bg.classList.remove('stormy');
+    if (c.props.rainbow) return 0;
+    const r = c.props.rainbow = c.add(Art.rainbow(), { left: '50%', top: '30%' }, 'rainbow');
+    anim(r.in, [{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 1200, easing: 'ease-out' });
+    Snd.sparkle(); [523, 587, 659, 784, 880, 1047].forEach((f, k) => Snd.tone(f, 0.2, 'triangle', 0.1, k * 0.15));
+    return 1500;
+  },
+  /* Stormy cheers up: the thunder stops and the storm turns into a soft white cloud */
+  calm(c) {
+    const a = c.enter('stormy'), bob = a.el.firstChild;
+    bob.innerHTML = Art.gloom({ mood: 0, storm: true });
+    c.bg.classList.add('stormy');
+    for (let s = 1; s <= 8; s++) c.after(700 + s * 160, () => { bob.innerHTML = Art.gloom({ mood: s / 8, storm: true }); Snd.tone(280 + s * 70, 0.12, 'triangle', 0.1); });
+    c.after(2100, () => { c.bg.classList.remove('stormy'); c.flash(); Snd.sparkle(); c.spray(['✨', '💖', '☁️'], c.pos('stormy'), 14, { dist: 220 }); });
+    return 2700;
+  },
+
   /* THE BIG ONE: the Gloom turns happy, the shard pops out and flies into the Rainbow Star */
   shard(c) {
-    const k = Math.max(0, c.wi), king = k === 4;
-    const g = c.add(Art.gloom({ mood: 0, king }), { left: '50%', top: '66%' }, 'bossgloom');
+    const k = Math.max(0, c.wi);
+    const g = c.add(gloomOf(k, 0), { left: '50%', top: '66%' }, 'bossgloom');
     popIn(g.in); Snd.grr();
     anim(g.in, [{ rotate: '0deg' }, { rotate: '-7deg' }, { rotate: '7deg' }, { rotate: '-5deg' }, { rotate: '5deg' }, { rotate: '0deg' }], { duration: 1100, delay: 500 });
-    for (let s = 1; s <= 8; s++) c.after(500 + s * 130, () => { g.in.innerHTML = Art.gloom({ mood: s / 8, king }); Snd.tone(280 + s * 70, 0.12, 'triangle', 0.1); });
+    for (let s = 1; s <= 8; s++) c.after(500 + s * 130, () => { g.in.innerHTML = gloomOf(k, s / 8); Snd.tone(280 + s * 70, 0.12, 'triangle', 0.1); });
     let sh, rays, em;
     c.after(1800, () => {            // the shard pops out
       rays = c.add('', { left: '50%', top: '56%' }, 'rays small');
@@ -250,7 +306,7 @@ const FX = {
       anim(sh.in, [{ transform: 'scale(.1) rotate(-200deg)' }, { transform: 'scale(1.2) rotate(10deg)', offset: 0.75 }, { transform: 'scale(1) rotate(0)' }], { duration: 800 });
       anim(g, [{ opacity: 1 }, { opacity: 0 }], { duration: 500, delay: 500, fill: 'forwards' });
       Snd.sparkle(); c.flash(); c.spray(['✨', '⭐', '💖'], { x: 50, y: 56 }, 14, { dist: 240 });
-      c.banner(`Star shard ${k + 1} of 5!`, 3800);
+      c.banner(`Star shard ${k + 1} of ${SHARD_WORLDS}!`, 3800);
     });
     c.after(3300, () => {            // the star appears, with the shards found before
       g.remove();

@@ -9,6 +9,7 @@ const WORDS = {
   5: [['apple', '🍎'], ['house', '🏠'], ['horse', '🐴'], ['tiger', '🐯'], ['train', '🚂'], ['cloud', '☁️'], ['heart', '❤️'], ['snake', '🐍'], ['mouse', '🐭'], ['pizza', '🍕'], ['robot', '🤖'], ['bread', '🍞'], ['chair', '🪑'], ['crown', '👑'], ['panda', '🐼'], ['whale', '🐳'], ['grape', '🍇'], ['lemon', '🍋'], ['zebra', '🦓'], ['shirt', '👕'], ['sheep', '🐑'], ['plane', '✈️'], ['candy', '🍬'], ['koala', '🐨']],
   6: [['rabbit', '🐰'], ['flower', '🌸'], ['monkey', '🐵'], ['banana', '🍌'], ['rocket', '🚀'], ['castle', '🏰'], ['dragon', '🐉'], ['guitar', '🎸'], ['pencil', '✏️'], ['cookie', '🍪'], ['turtle', '🐢'], ['spider', '🕷️'], ['orange', '🍊'], ['carrot', '🥕'], ['candle', '🕯️'], ['cheese', '🧀'], ['planet', '🪐'], ['kitten', '🐱'], ['window', '🪟'], ['ladder', '🪜']],
   7: [['rainbow', '🌈'], ['unicorn', '🦄'], ['penguin', '🐧'], ['dolphin', '🐬'], ['balloon', '🎈'], ['diamond', '💎'], ['giraffe', '🦒'], ['snowman', '⛄'], ['cupcake', '🧁'], ['octopus', '🐙'], ['popcorn', '🍿'], ['volcano', '🌋']],
+  8: [['elephant', '🐘'], ['dinosaur', '🦕'], ['sandwich', '🥪'], ['umbrella', '☂️'], ['kangaroo', '🦘'], ['mushroom', '🍄'], ['pancakes', '🥞'], ['scissors', '✂️'], ['football', '🏈'], ['flamingo', '🦩'], ['hedgehog', '🦔'], ['raindrop', '💧'], ['princess', '👸'], ['mountain', '🏔️'], ['computer', '💻'], ['backpack', '🎒'], ['broccoli', '🥦'], ['cucumber', '🥒'], ['lollipop', '🍭'], ['sailboat', '⛵'], ['airplane', '✈️'], ['dumpling', '🥟']],
 };
 
 /* Words that rhyme (same ending sound) */
@@ -24,21 +25,30 @@ const RHYMES = [
 const OPPOSITES = [['hot', 'cold'], ['big', 'small'], ['up', 'down'], ['happy', 'sad'], ['day', 'night'], ['fast', 'slow'], ['open', 'closed'], ['wet', 'dry'], ['light', 'dark'], ['full', 'empty'], ['young', 'old'], ['soft', 'hard'], ['loud', 'quiet'], ['tall', 'short'], ['clean', 'dirty'], ['first', 'last']];
 /* words that mean almost the same: one of them is never shown as a wrong answer for the other's opposite */
 const SIMILAR = [['big', 'tall'], ['small', 'short'], ['day', 'light'], ['night', 'dark']];
+/* Two words make one new word: [first, second, picture, wrong, wrong]. The wrong words never make a real word. */
+const COMPOUNDS = [
+  ['rain', 'bow', '🌈', 'pig', 'cup'], ['sun', 'flower', '🌻', 'boat', 'ring'], ['snow', 'man', '⛄', 'pen', 'cup'], ['cup', 'cake', '🧁', 'dog', 'sun'],
+  ['pop', 'corn', '🍿', 'fish', 'hat'], ['butter', 'fly', '🦋', 'cow', 'dog'], ['tooth', 'brush', '🪥', 'cake', 'bus'], ['foot', 'ball', '🏈', 'hen', 'cup'],
+  ['pan', 'cake', '🥞', 'ring', 'bed'], ['skate', 'board', '🛹', 'cat', 'hat'], ['sun', 'glasses', '😎', 'pig', 'bus'], ['lady', 'bug', '🐞', 'cup', 'sock'],
+  ['air', 'plane', '✈️', 'dog', 'pen'], ['water', 'melon', '🍉', 'bus', 'hen'], ['snow', 'flake', '❄️', 'bat', 'hen'], ['hand', 'bag', '👜', 'egg', 'cow'],
+];
 
 /* ---------- SENTENCES ---------- */
-/* Put the words in order. One list for each difficulty step (1 to 5). */
+/* Put the words in order. One list for each difficulty step (1 to 6). */
 const SENT_ORDER = {
   1: [['I see a cat.', '🐱'], ['The sun is hot.', '☀️'], ['The dog can run.', '🐶'], ['We play ball.', '⚽'], ['I am happy.', '😊'], ['The fish can swim.', '🐟'], ['It is a hat.', '🎩'], ['The bee is small.', '🐝'], ['I love my mom.', '❤️'], ['The frog can jump.', '🐸'], ['Snow is cold.', '❄️'], ['I like red apples.', '🍎']],
   2: [['My dog likes to play.', '🐶'], ['I can see the moon.', '🌙'], ['She has a red ball.', '🔴'], ['We go to the park.', '🌳'], ['The duck swims in water.', '🦆'], ['He eats a big cake.', '🎂'], ['I like to read books.', '📖'], ['The star is very bright.', '⭐'], ['My cat drinks milk.', '🥛'], ['The bus is yellow.', '🚌'], ['Bears like to eat fish.', '🐻'], ['The snow is so soft.', '❄️']],
   3: [['The cat sat on the mat.', '🐱'], ['The bird sings in the tree.', '🐦'], ['I like to play with blocks.', '🧱'], ['The little frog jumps very high.', '🐸'], ['We made a big snowman today.', '⛄'], ['My friend has a pink kite.', '🪁'], ['The rabbit eats an orange carrot.', '🐰'], ['The moon shines at night.', '🌙'], ['Can you see the rainbow?', '🌈'], ['Where is my blue hat?', '🎩'], ['The kitten plays with the ball.', '🐱']],
   4: [['The brave girl sings a happy song.', '🎤'], ['My little kitten likes to chase butterflies.', '🦋'], ['We build a tall tower with blocks.', '🧱'], ['The snow falls softly on the hill.', '🏔️'], ['Do you want to play with me?', '🤝'], ['The penguin slides down the icy hill.', '🐧'], ['I gave my friend a big hug.', '🤗'], ['The singer danced on the bright stage.', '💃'], ['A rainbow comes out after the rain.', '🌈']],
   5: [['The stars come out when it is dark.', '🌟'], ['My friends and I love to sing together.', '🎶'], ['The little kitten found a shiny gold key.', '🔑'], ['We can do anything if we work together.', '💪'], ['The ice castle sparkles in the morning sun.', '🏰'], ['Why do the birds fly south in winter?', '🐦'], ['Plants need water and sunlight to grow big.', '🌱'], ['The brave princess was not afraid of mistakes.', '👑']],
+  6: [['The little dragon practiced flying every single day.', '🐉'], ['We saw a rainbow after the big storm.', '🌈'], ['My kite flew high above the fluffy clouds.', '🪁'], ['If you keep trying, you will get better.', '💪'], ['The wind blew my hat into the tree.', '🎩'], ['Can we fly to the islands in the sky?', '☁️'], ['Lightning flashed and then the thunder boomed.', '⚡'], ['The hot air balloon floated over the town.', '🎈'], ['My grandma and I baked cookies for everyone.', '🍪'], ['When it rains, I wear my yellow boots.', '🌧️'], ['Friends help each other when things are hard.', '🤝']],
 };
-/* Pick the right word: [sentence, right, wrong, wrong]. Three groups: easy, middle, hard. */
+/* Pick the right word: [sentence, right, wrong, wrong]. Four groups: easy, middle, hard, top. */
 const SENT_BLANK = {
   easy: [['The cat ___ big.', 'is', 'are', 'am'], ['I ___ a girl.', 'am', 'is', 'are'], ['The dogs ___ running.', 'are', 'is', 'am'], ['A fish can ___.', 'swim', 'fly', 'sing'], ['The sun is ___.', 'hot', 'cold', 'wet'], ['Ice is ___.', 'cold', 'hot', 'loud'], ['I see with my ___.', 'eyes', 'ears', 'nose'], ['A frog can ___.', 'jump', 'read', 'drive'], ['We ___ to school.', 'go', 'goes', 'going'], ['I hear with my ___.', 'ears', 'eyes', 'hands']],
   mid: [['She ___ a red hat.', 'has', 'have', 'having'], ['They ___ playing in the snow.', 'are', 'is', 'am'], ['The kitten ___ milk every day.', 'drinks', 'drink', 'drinking'], ['Yesterday we ___ to the park.', 'went', 'go', 'goes'], ['He ___ very fast.', 'runs', 'run', 'running'], ['I have two ___.', 'cats', 'cat', 'cates'], ['The girl ___ a song.', 'sings', 'sing', 'singing'], ['We ___ happy today.', 'are', 'is', 'am'], ['The snow ___ white.', 'is', 'are', 'be'], ['Birds ___ in the sky.', 'fly', 'flies', 'flying']],
   hard: [['Yesterday I ___ a snowman.', 'built', 'build', 'builds'], ['The cat is ___ than the mouse.', 'bigger', 'big', 'biggest'], ['The turtle walks ___.', 'slowly', 'slow', 'slower'], ['We ___ going to build a castle.', 'are', 'is', 'am'], ['The girls ___ their song last night.', 'sang', 'sing', 'sings'], ['This is the ___ tower in the valley.', 'tallest', 'tall', 'taller'], ['I ___ my teeth every morning.', 'brush', 'brushes', 'brushing'], ['Mochi ___ not like the rain.', 'does', 'do', 'doing'], ['There ___ three birds in the tree.', 'are', 'is', 'am'], ['Tomorrow we ___ visit the castle.', 'will', 'did', 'was']],
+  top: [['I wore a coat ___ it was cold.', 'because', 'but', 'or'], ['Sora wanted to fly, ___ her wings were too small.', 'but', 'because', 'or'], ['Do you want milk ___ juice?', 'or', 'but', 'because'], ['It was raining, ___ we stayed inside.', 'so', 'but', 'or'], ['Yesterday we ___ a rainbow.', 'saw', 'see', 'seen'], ['Last night the wind ___ very hard.', 'blew', 'blow', 'blowed'], ['Nova and Lumi are friends. ___ like to sing.', 'They', 'She', 'He'], ['This is my book. It is ___.', 'mine', 'me', 'my'], ['Sora ___ over the clouds this morning.', 'flew', 'fly', 'flied'], ['Two ___ sat on the fence.', 'mice', 'mouses', 'mouse'], ['The storm was ___ than the rain.', 'louder', 'loud', 'loudest'], ['There are many ___ in the sky.', 'clouds', 'cloud', 'cloudes']],
 };
 /* Which mark goes at the end? */
 const SENT_PUNCT = [['What is your name', '?'], ['I like ice cream', '.'], ['Wow, that is amazing', '!'], ['Where is the kitten', '?'], ['The sky is blue', '.'], ['Watch out', '!'], ['Can you help me', '?'], ['We are friends', '.'], ['How old are you', '?'], ['Hooray, we did it', '!'], ['My hat is pink', '.'], ['Who took the star', '?']];
@@ -65,6 +75,9 @@ const SCI_SORT = [
   { tier: 5, q: 'Which bin does it go in?', bins: ['📄 Paper', '🥤 Plastic and metal', '🍌 Food scraps'], items: [['📰', 'newspaper', 0], ['📦', 'cardboard box', 0], ['✉️', 'envelope', 0], ['🧴', 'plastic bottle', 1], ['🥫', 'metal can', 1], ['🥤', 'plastic cup', 1], ['🍌', 'banana peel', 2, 'Food scraps can turn into soil. This is called compost.'], ['🍎', 'apple core', 2], ['🥚', 'egg shell', 2]] },
   { tier: 5, q: 'Does it make its own light?', bins: ['💡 Makes light', '🌑 No light of its own'], items: [['☀️', 'sun', 0], ['🔥', 'fire', 0], ['💡', 'lamp', 0], ['⭐', 'star', 0, 'Stars are suns that are very far away.'], ['🕯️', 'candle', 0], ['🌙', 'moon', 1, 'The moon shines because the sun lights it up.'], ['🪞', 'mirror', 1], ['🪨', 'rock', 1], ['💎', 'diamond', 1], ['🌍', 'Earth', 1]] },
   { tier: 5, q: 'Does it need electricity to work?', bins: ['🔌 Needs electricity', '🙌 Works without it'], items: [['📺', 'TV', 0], ['💡', 'lamp', 0], ['💻', 'computer', 0], ['📱', 'phone', 0], ['🚲', 'bike', 1], ['📖', 'book', 1], ['🕯️', 'candle', 1], ['⚽', 'ball', 1], ['🪁', 'kite', 1], ['🥁', 'drum', 1]] },
+  { tier: 6, q: 'What do you wear in this weather?', bins: ['☀️ Sunny', '🌧️ Rainy', '❄️ Snowy'], items: [['😎', 'sunglasses', 0], ['👒', 'sun hat', 0], ['🩳', 'shorts', 0], ['🧴', 'sunscreen', 0], ['☂️', 'umbrella', 1, 'An umbrella keeps the rain off your head.'], ['👢', 'rain boots', 1], ['🧤', 'mittens', 2], ['🧣', 'scarf', 2], ['🛷', 'sled', 2]] },
+  { tier: 6, q: 'Can it fly?', bins: ['🕊️ Can fly', '🚶 Can not fly'], items: [['🦅', 'eagle', 0], ['🐝', 'bee', 0], ['🦋', 'butterfly', 0], ['🦇', 'bat', 0, 'Bats are mammals, and they can really fly.'], ['🦉', 'owl', 0], ['🐧', 'penguin', 1, 'Penguins have wings, but they use them to swim.'], ['🐶', 'dog', 1], ['🐌', 'snail', 1], ['🐢', 'turtle', 1], ['🐘', 'elephant', 1]] },
+  { tier: 6, q: 'Which sense do you use?', bins: ['👀 See', '👂 Hear', '👃 Smell'], items: [['🌈', 'a rainbow', 0], ['⭐', 'the stars', 0], ['⚡', 'lightning', 0], ['🔔', 'a bell', 1], ['🥁', 'a drum', 1], ['🌩️', 'thunder', 1, 'We see lightning and we hear thunder.'], ['🌹', 'a rose', 2], ['🧄', 'garlic', 2], ['🍪', 'fresh cookies', 2]] },
 ];
 /* Put in order: tier, question, steps [picture, name] in the right order */
 const SCI_ORDER = [
@@ -80,6 +93,9 @@ const SCI_ORDER = [
   { tier: 4, q: 'Who gives energy to who? Start with the sun.', steps: [['☀️', 'sun'], ['🌿', 'grass'], ['🐰', 'rabbit'], ['🦊', 'fox']] },
   { tier: 5, q: 'How does an apple tree grow?', steps: [['🌰', 'seed'], ['🌱', 'sprout'], ['🌳', 'tree'], ['🌸', 'blossom'], ['🍎', 'apple']] },
   { tier: 5, q: 'Smallest to biggest in space.', steps: [['🌙', 'moon'], ['🌍', 'Earth'], ['🪐', 'Jupiter'], ['☀️', 'sun']] },
+  { tier: 6, q: 'The moon looks bigger each night. Put it in order.', steps: [['🌑', 'dark moon'], ['🌒', 'thin moon'], ['🌓', 'half moon'], ['🌕', 'full moon']] },
+  { tier: 6, q: 'A storm, from start to end.', steps: [['☁️', 'dark clouds'], ['⚡', 'lightning'], ['💥', 'thunder'], ['🌈', 'rainbow']] },
+  { tier: 6, q: 'The colors of a rainbow. Start at the top.', steps: [['🟥', 'red'], ['🟧', 'orange'], ['🟨', 'yellow'], ['🟩', 'green'], ['🟦', 'blue'], ['🟪', 'purple']] },
 ];
 /* Quiz: [question, right, wrong, wrong, fun fact] */
 const SCI_QUIZ = {
@@ -139,10 +155,23 @@ const SCI_QUIZ = {
     ['Which planet is the biggest?', 'Jupiter', 'Earth', 'Mars', 'Jupiter is so big that 1,000 Earths could fit inside.'],
     ['Sound is made by...?', 'things that shake very fast', 'colors', 'shadows', 'Fast shaking is called vibration. Touch your throat and hum!'],
   ],
+  6: [
+    ['What makes a rainbow?', '☀️ sunlight and 💧 rain', '🌙 the moon and stars', '💨 wind and dust', 'Sunlight goes through raindrops and splits into colors.'],
+    ['Why do we see lightning before we hear thunder?', 'Light is faster than sound', 'Thunder is shy', 'Our ears are slow', 'Light is the fastest thing there is!'],
+    ['What is wind?', '💨 moving air', '💧 falling water', '🔥 warm fire', 'You can not see air, but you can feel it move.'],
+    ['What are clouds made of?', '💧 tiny drops of water', '🍬 cotton candy', '🪶 feathers', 'When the drops get big and heavy, they fall as rain.'],
+    ['What makes a kite fly?', '💨 wind', '🌙 the moon', '🎵 music', 'The wind pushes up on the kite.'],
+    ['What do we call balls of ice that fall from clouds?', 'hail', 'fog', 'sand', 'Hail is rain that froze high up in the cold sky.'],
+    ['Which one is a planet?', '🌍 Earth', '☀️ the Sun', '🌙 the Moon', 'The Sun is a star. The Moon goes around the Earth.'],
+    ['Why is it dark at night?', 'Our side of the Earth turns away from the Sun', 'The Sun goes to sleep', 'Clouds cover the Sun', 'The Earth spins around once every day.'],
+    ['What do your lungs do?', 'help you breathe', 'help you see', 'help you walk', 'Your lungs fill up with air like two balloons.'],
+    ['What helps a bird fly?', '🪶 feathers and wings', '🐾 paws', '🐚 a shell', 'Feathers are light but strong.'],
+  ],
 };
 
 /* ---------- WORLDS, LEVELS AND STORY ---------- */
-/* Level types: words, math, sentences, science, creative, boss */
+/* Level types: words, math, sentences, science, creative, boss.
+   gloom: how the boss Gloom looks (king: with a crown, storm: a storm cloud). */
 const WORLDS = [
   { id: 'frost', name: 'Frost Peaks', emoji: '🏔️', host: 'lumi', tier: 1, float: ['❄️', '❄️', '🌨️', '⛄', '❄️'],
     levels: [
@@ -180,7 +209,7 @@ const WORLDS = [
       { t: 'creative', tool: 'scene', name: 'Party Picture', icon: '🎨', intro: 'Use your ideas!', prompt: 'Make a party picture. Who will come?' },
       { t: 'boss', name: 'Sneaky Gloom', icon: '👾', intro: 'This Gloom hides in the flowers. Cheer it up!' },
     ] },
-  { id: 'castle', name: 'Gloom Castle', emoji: '🏰', host: 'twinkle', tier: 5, float: ['⭐', '🌙', '✨', '🦇', '⭐'],
+  { id: 'castle', name: 'Gloom Castle', emoji: '🏰', host: 'twinkle', tier: 5, float: ['⭐', '🌙', '✨', '🦇', '⭐'], gloom: { king: true },
     levels: [
       { t: 'words', name: 'The Word Gate', icon: '🔤', intro: 'Spell the words to open the gate.' },
       { t: 'math', name: 'The Number Stairs', icon: '🔢', intro: 'Each step is a number puzzle.' },
@@ -189,7 +218,18 @@ const WORLDS = [
       { t: 'creative', tool: 'story', name: 'Tell a Story', icon: '🎨', intro: 'Use your ideas!', prompt: 'Make a story for King Grumble.' },
       { t: 'boss', name: 'King Grumble', icon: '👑', intro: 'The Gloom King has the last shard. Show him what friends can do!' },
     ] },
+  { id: 'sky', name: 'Sky Islands', emoji: '☁️', host: 'sora', tier: 6, float: ['☁️', '🌈', '🪁', '✨', '☁️'], gloom: { storm: true },
+    levels: [
+      { t: 'math', name: 'Cloud Groups', icon: '🔢', intro: 'Clouds float in groups. Count the groups to find how many!' },
+      { t: 'words', name: 'Wind Words', icon: '🔤', intro: 'The wind blew the letters away. Spell the long words!' },
+      { t: 'science', name: 'Weather Watch', icon: '🔬', intro: 'Sun, rain, wind and storms. Let us learn about the sky!' },
+      { t: 'sentences', name: 'Sky Mail', icon: '📝', intro: 'Birds carry letters here. Fix the sentences!' },
+      { t: 'creative', tool: 'paint', name: 'Paint the Sky', icon: '🎨', intro: 'Use your ideas!', prompt: 'Color a picture for Sora. Use any colors you like!' },
+      { t: 'boss', name: 'Stormy', icon: '⛈️', intro: 'Stormy rumbles in the clouds. Cheer Stormy up!' },
+    ] },
 ];
+/* The first 5 worlds each hide a shard of the Rainbow Star. The worlds after them are new adventures. */
+const SHARD_WORLDS = 5;
 
 /* Story scenes. They play like a little movie.
    A line is [who, text, mood, effect]. {name} is the hero's name.
@@ -301,6 +341,33 @@ const STORY = {
     ['narr', 'The five shards came together. The Rainbow Star shone again!'],
     ['narr', 'The Glooms were never grumpy again. Now they are called the Glows.', null, 'glows'],
     ['twinkle', 'You did it, {name}! You are the Star Guardian!', 'happy', 'party'],
+    ['twinkle', 'Wait... look! A rainbow bridge goes up into the clouds. A new adventure!', 'happy', 'rainbow'],
+  ],
+  'sky-in': [
+    ['twinkle', 'Look, {name}! The rainbow bridge goes up into the sky.', 'happy', 'rainbow'],
+    ['twinkle', 'Welcome to Sky Islands! But why is it so dark up here?', 'sad'],
+    ['fx', 'thunder'],
+    ['narr', 'BOOM! A big storm rolls over the islands.'],
+    ['sora', 'Eek! Oh... hello. I am Sora. I am a sky dragon.', 'sad'],
+    ['sora', 'Sky dragons can fly. But I can not. Look...', 'sad', 'flapfail'],
+    ['sora', 'See? I can not do it. I give up.', 'sad'],
+    ['hero', 'You can not do it YET. Let us practice together!'],
+    ['sora', 'Not yet... I like that. OK, I will keep trying!', 'happy'],
+  ],
+  'sky-boss': [
+    ['stormy', 'RUMBLE! Go away! Nobody comes up here to play with a storm!', null, 'thunder'],
+    ['twinkle', 'That is Stormy, the last Gloom. Stormy slept through our party!'],
+    ['sora', 'My wings are shaking... but I will not give up!', 'happy'],
+  ],
+  'sky-out': [
+    ['fx', 'calm'],
+    ['stormy', 'You came all the way up here... to play with ME?'],
+    ['hero', 'Yes! Everyone is welcome. Even a storm!'],
+    ['sora', 'I practiced and practiced. Now I can fly!', 'happy', 'fly'],
+    ['fx', 'powerup', 'sora'],
+    ['narr', 'Now Stormy makes soft rain for the flowers. And after the rain...', null, 'rain'],
+    ['fx', 'rainbow'],
+    ['twinkle', 'You did it, {name}! Sky Islands is bright again!', 'happy', 'party'],
   ],
 };
 
@@ -310,9 +377,10 @@ const FRIENDS = [
   { id: 'pix', name: 'Pix', world: 1, about: 'A builder from Block Valley.', before: 'Pix builds too fast, so things fall down.', after: 'Pix learned to count and plan first.', power: 'Golden Hammer' },
   { id: 'nova', name: 'Nova', world: 2, about: 'A singer in the Starlights band.', before: 'She is too shy to sing.', after: 'She found her voice with help from friends.', power: 'Star Mic' },
   { id: 'mochi', name: 'Mochi', world: 3, about: 'A kitten who loves to ask why.', before: 'She thinks she asks too many questions.', after: 'Her questions solved the big mystery!', power: 'Wonder Glass' },
+  { id: 'sora', name: 'Sora', world: 5, about: 'A little sky dragon.', before: 'She gives up when things are hard.', after: 'She learned to say "not yet" and kept practicing. Now she can fly!', power: 'Rainbow Wings' },
 ];
 
-const HERO_TITLES = ['Star Seeker', 'Snow Scout', 'Word Wizard', 'Block Builder', 'Number Ninja', 'Song Star', 'Idea Maker', 'Science Scout', 'Wonder Kid', 'Shard Finder', 'Rainbow Hero', 'Star Guardian'];
+const HERO_TITLES = ['Star Seeker', 'Snow Scout', 'Word Wizard', 'Block Builder', 'Number Ninja', 'Song Star', 'Idea Maker', 'Science Scout', 'Wonder Kid', 'Shard Finder', 'Rainbow Hero', 'Star Guardian', 'Cloud Climber', 'Sky Legend'];
 
 const SHOP = [
   { id: 'flower', name: 'Flower', slot: 'head', cost: 15 },

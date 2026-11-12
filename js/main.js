@@ -44,6 +44,9 @@ const worldStars = w => WORLDS[w].levels.reduce((n, _, l) => n + starsOf(w, l), 
 const totalStars = () => WORLDS.reduce((n, _, w) => n + worldStars(w), 0);
 const heroLevel = () => Math.min(HERO_TITLES.length, Math.floor(S().xp / 90) + 1);
 const friendStage = id => { const f = FRIENDS.find(x => x.id === id); return f && worldDone(f.world) ? 2 : 1; };
+const TOP_TIER = Math.max(...WORLDS.map(W => W.tier));
+/* the boss of world w (a crown in Gloom Castle, a storm cloud in Sky Islands) */
+const gloomOf = (w, mood) => Art.gloom(Object.assign({ mood }, WORLDS[w].gloom));
 const say = t => t.replace(/\{name\}/g, S().hero ? S().hero.name : 'friend');
 
 /* ---------- the cast ---------- */
@@ -54,9 +57,11 @@ const CAST = {
   pix: { name: () => 'Pix', draw: (m, st) => Art.pix(st || friendStage('pix'), m) },
   nova: { name: () => 'Nova', draw: (m, st) => Art.nova(st || friendStage('nova'), m) },
   mochi: { name: () => 'Mochi', draw: (m, st) => Art.mochi(st || friendStage('mochi'), m) },
+  sora: { name: () => 'Sora', draw: (m, st) => Art.sora(st || friendStage('sora'), m) },
   gloom: { name: () => 'Gloom', draw: () => Art.gloom({ mood: 0 }) },
   glow: { name: () => 'Glow', draw: () => Art.gloom({ mood: 1 }) },
   grumble: { name: () => 'King Grumble', draw: () => Art.gloom({ mood: worldDone(4) ? 1 : 0.1, king: true }) },
+  stormy: { name: () => 'Stormy', draw: () => Art.gloom({ mood: worldDone(5) ? 1 : 0, storm: true }) },
   narr: { name: () => '', draw: () => Art.narr() },
 };
 const draw = (who, mood = 'happy') => CAST[who].draw(mood);
@@ -88,7 +93,7 @@ function titleScreen() {
 /* =============== HERO MAKER =============== */
 const LOOKS = {
   skin: ['#ffe0c8', '#f6cfa6', '#e0a878', '#a86b45'],
-  hair: ['#2b2b3a', '#5b3a29', '#b5651d', '#f2c94c', '#ff7eb6', '#8e6bff', '#22c7b8'],
+  hair: ['#2b2b3a', '#5b3a29', '#b5651d', '#f2c94c', '#f4f1ec', '#ff7eb6', '#8e6bff', '#22c7b8'],
   style: ['long', 'bob', 'buns', 'twin', 'pony'],
   dress: ['#ff7eb6', '#8e6bff', '#4aa8ff', '#3ecf8e', '#ffb347', '#ef5350'],
 };
@@ -142,12 +147,12 @@ function mapScreen() {
       h('div', { class: 'whost', html: open ? draw(Wd.host) : '' }),
       h('b', { text: Wd.name }),
       h('small', { text: open ? `⭐ ${worldStars(w)} / ${Wd.levels.length * 3}` : 'Locked' }),
-      worldDone(w) ? h('div', { class: 'shard', html: Art.shard(w) }) : null);
+      worldDone(w) ? h('div', { class: 'shard' + (w < SHARD_WORLDS ? '' : ' wide'), html: w < SHARD_WORLDS ? Art.shard(w) : Art.rainbow() }) : null);
   });
   App.screen('map bg-map',
     floaters(['⭐', '✨', '☁️']),
     h('div', { class: 'topbar' }, heroChip(),
-      h('div', { class: 'counts' }, h('span', { text: '⭐ ' + totalStars() }), h('span', { text: '💎 ' + S().gems }), h('span', { class: 'emblemchip' }, h('i', { class: 'emblem', html: Art.star5(WORLDS.map((_, w) => worldDone(w))) }), WORLDS.filter((_, w) => worldDone(w)).length + '/5')),
+      h('div', { class: 'counts' }, h('span', { text: '⭐ ' + totalStars() }), h('span', { text: '💎 ' + S().gems }), h('span', { class: 'emblemchip' }, h('i', { class: 'emblem', html: Art.star5(WORLDS.slice(0, SHARD_WORLDS).map((_, w) => worldDone(w))) }), WORLDS.slice(0, SHARD_WORLDS).filter((_, w) => worldDone(w)).length + '/' + SHARD_WORLDS)),
       h('div', { class: 'navbtns' },
         h('button', { class: 'navbtn', html: '👗<small>Dress up</small>', onclick: wardrobe }),
         h('button', { class: 'navbtn', html: '🎨<small>Studio</small>', onclick: studio }),
@@ -203,7 +208,7 @@ function startLevel(w, l) {
 
 /* =============== PLAY A LEVEL =============== */
 const PRAISE = ['Great job!', 'Super!', 'You did it!', 'Amazing!', 'Wow!', 'So smart!', 'Yes!', 'Brilliant!'];
-const SHOTS = { hero: '⭐', lumi: '❄️', pix: '🧱', nova: '🎵', mochi: '🐾' };
+const SHOTS = { hero: '⭐', lumi: '❄️', pix: '🧱', nova: '🎵', mochi: '🐾', sora: '🌈' };
 /* throw an emoji from one thing on screen to another, then call after() */
 function shoot(fromEl, toEl, emoji, after) {
   const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
@@ -218,7 +223,7 @@ const wobble = el => anim(el, [{ transform: 'scale(1,1)' }, { transform: 'scale(
 
 function runQuiz(w, l) {
   const Wd = WORLDS[w], L = Wd.levels[l], boss = L.t === 'boss';
-  const tier = clamp(Wd.tier + (S().settings.boost || 0), 1, 5);
+  const tier = clamp(Wd.tier + (S().settings.boost || 0), 1, TOP_TIER);
   const qs = Gen[L.t](tier), n = qs.length;
   let i = 0, mistakes = 0, hearts = 5, over = false;
   const heartsEl = h('div', { class: 'hearts' });
@@ -243,7 +248,7 @@ function runQuiz(w, l) {
   const drawBoss = () => {
     if (!boss) return;
     const mood = i / n;
-    bossFace.innerHTML = Art.gloom({ mood, king: w === 4 });
+    bossFace.innerHTML = gloomOf(w, mood);
     meterFill.style.width = mood * 100 + '%';
     heartsEl.textContent = '❤️'.repeat(hearts) + '🤍'.repeat(5 - hearts);
   };
@@ -316,7 +321,7 @@ function failScreen(w, l) {
   Snd.lose();
   App.screen('result bg-' + WORLDS[w].id,
     h('div', { class: 'card resultcard' },
-      h('div', { class: 'cardhost', html: Art.gloom({ mood: 0.2, king: w === 4 }) }),
+      h('div', { class: 'cardhost', html: gloomOf(w, 0.2) }),
       h('h2', { text: 'The Gloom ran away!' }),
       h('p', { text: 'That is OK. Mistakes help us learn. Try again!' }),
       h('div', { class: 'row' },
@@ -338,7 +343,7 @@ function finishLevel(w, l, mistakes, creative) {
   Snd.win(); confetti(stars * 14);
   const after = () => {
     if (boss && !S().seen[Wd.id + '-out']) {   // not "first win": the child may have tapped Play again before Next
-      return playScene(Wd.id + '-out', 'bg-' + Wd.id, () => (w === WORLDS.length - 1 ? endingScreen() : mapScreen()));
+      return playScene(Wd.id + '-out', 'bg-' + Wd.id, () => (w === SHARD_WORLDS - 1 ? endingScreen() : mapScreen()));
     }
     worldScreen(w);
   };
@@ -347,7 +352,7 @@ function finishLevel(w, l, mistakes, creative) {
   App.screen('result bg-' + Wd.id,
     floaters(Wd.float),
     h('div', { class: 'card resultcard' },
-      h('div', { class: 'cardhost', html: boss ? Art.gloom({ mood: 1, king: w === 4 }) : draw(Wd.host) }),
+      h('div', { class: 'cardhost', html: boss ? gloomOf(w, 1) : draw(Wd.host) }),
       h('h2', { text: boss ? 'The Gloom is happy now!' : L.name + ' done!' }),
       starRow,
       h('p', { text: msg }),
@@ -368,7 +373,7 @@ function endingScreen() {
     h('div', { class: 'castrow' },
       h('div', { html: draw('lumi') }), h('div', { html: draw('pix') }), h('div', { class: 'mid', html: draw('hero') }),
       h('div', { html: draw('nova') }), h('div', { html: draw('mochi') }), h('div', { html: draw('grumble') })),
-    h('p', { class: 'endnote', text: 'Keep playing! Get 3 stars in every level, dress up, and make new things in the Studio.' }),
+    h('p', { class: 'endnote', text: worldOpen(SHARD_WORLDS) && !worldDone(SHARD_WORLDS) ? 'A rainbow bridge goes up into the clouds! Find Sky Islands on the map.' : 'Keep playing! Get 3 stars in every level, dress up, and make new things in the Studio.' }),
     h('button', { class: 'btn huge', text: 'Back to the map ▶', onclick: mapScreen }));
 }
 
@@ -405,13 +410,13 @@ function wardrobe() {
 
 /* =============== STUDIO (free creative play) =============== */
 function studio() {
-  const order = ['builder', 'pet', 'song', 'scene', 'story'];
-  const cards = order.map((tool, w) => {
-    const T = Creative.TOOLS[tool], open = S().settings.unlockAll || starsOf(w, 4) > 0;
+  const cards = WORLDS.map((Wd, w) => {
+    const l = Wd.levels.findIndex(L => L.t === 'creative'), tool = Wd.levels[l].tool;
+    const T = Creative.TOOLS[tool], open = S().settings.unlockAll || starsOf(w, l) > 0;
     return h('button', { class: 'toolcard' + (open ? '' : ' locked'), onclick: () => {
-      if (!open) { Snd.bad(); return toast(`🔒 Find this in ${WORLDS[w].name}.`); }
+      if (!open) { Snd.bad(); return toast(`🔒 Find this in ${Wd.name}.`); }
       Creative.open(tool, { onDone: studio, onBack: studio });
-    } }, h('div', { class: 'em', text: open ? T.icon : '🔒' }), h('b', { text: T.name }), h('small', { text: open ? 'Tap to create' : `Find it in ${WORLDS[w].name}` }));
+    } }, h('div', { class: 'em', text: open ? T.icon : '🔒' }), h('b', { text: T.name }), h('small', { text: open ? 'Tap to create' : `Find it in ${Wd.name}` }));
   });
   App.screen('studio bg-map',
     h('div', { class: 'topbar' }, backBtn(mapScreen), h('h2', { text: '🎨 Studio' }), h('span')),
@@ -433,7 +438,7 @@ function friendsScreen() {
   const glows = WORLDS.filter((_, w) => worldDone(w)).length;
   App.screen('friends bg-map',
     h('div', { class: 'topbar' }, backBtn(mapScreen), h('h2', { text: '💖 My friends' }), h('span')),
-    h('p', { class: 'lead', text: `Glooms turned into happy Glows: ${glows} of 5` }),
+    h('p', { class: 'lead', text: `Glooms turned into happy Glows: ${glows} of ${WORLDS.length}` }),
     h('div', { class: 'friendrow' }, cards));
 }
 
@@ -465,7 +470,7 @@ function parentScreen() {
       h('h4', { text: 'Settings' }),
       h('div', { class: 'chips' }, toggle('Sound', 'sfx', () => { Snd.on = st.sfx; }), toggle('Voice (reads text aloud)', 'voice', () => { Voice.on = st.voice; }), toggle('Unlock all levels', 'unlockAll')),
       h('h4', { text: 'Difficulty' }), diff,
-      h('p', { class: 'dim', text: 'Each world is one step harder: math goes from numbers up to 10 (world 1) to adding and taking away up to 100 (world 5). "Easier" and "Harder" move every world by one step.' }),
+      h('p', { class: 'dim', text: 'Each world is one step harder: math goes from numbers up to 10 (world 1) to adding and taking away up to 100 (world 5), then groups, doubles and halves (world 6). "Easier" and "Harder" move every world by one step.' }),
       h('h4', { text: 'Progress' }),
       h('table', { class: 'stats' }, h('tr', {}, h('th', { text: 'Subject' }), h('th', { text: 'Questions done' }), h('th', { text: 'Right on first try' })), rows),
       h('p', { class: 'dim', text: `Stars: ${totalStars()} of ${WORLDS.length * 18}. Hero level: ${heroLevel()}.` }),

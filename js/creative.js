@@ -1,5 +1,5 @@
 /* Creative tools: there are no wrong answers here.
-   builder (blocks), pet (invent an animal), song, scene (stickers), story. */
+   builder (blocks), pet (invent an animal), song, scene (stickers), story, paint (color book). */
 'use strict';
 
 const Creative = {
@@ -9,6 +9,7 @@ const Creative = {
     song: { name: 'Song Maker', icon: '🎵', prompt: 'Make your own song!' },
     scene: { name: 'Sticker Picture', icon: '🖼️', prompt: 'Make a picture with stickers!' },
     story: { name: 'Story Maker', icon: '📚', prompt: 'Make your own story!' },
+    paint: { name: 'Color Book', icon: '🖍️', prompt: 'Color a picture any way you like!' },
   },
 
   /* opts: prompt, onDone(), onBack() */
@@ -258,5 +259,53 @@ const Creative = {
     rows.append(row('1. Who is the hero?', WHO, 'w'), row('2. Where does the hero go?', WHERE, 'p'), row('3. What is the problem?', PROBLEM, 'q'), row('4. How does the hero fix it?', FIX, 'f'));
     body.append(rows, book);
     update();
+  },
+
+  /* ---------- 6. Color book ---------- */
+  paint(body, api) {
+    const COLORS = ['#ef5350', '#ff9f43', '#ffd54a', '#5fd38d', '#4aa8ff', '#8e6bff', '#ff7eb6', '#9b6b43', '#a8e6ff', '#3a3a55', '#ffffff'];
+    const ring = (R, r) => `<path d="M${150 - R},230 A${R},${R} 0 0 1 ${150 + R},230 L${150 + r},230 A${r},${r} 0 0 0 ${150 - r},230 Z"/>`;
+    const bow = (x, y) => `<path d="M${x - 15},${y - 9} L${x + 15},${y + 9} L${x + 15},${y - 9} L${x - 15},${y + 9} Z"/>`;
+    const cloud = (x, y) => `<path d="M${x - 40},${y} a16,16 0 0 1 22,-20 a22,22 0 0 1 38,-2 a16,16 0 0 1 18,22 Z"/>`;
+    /* each picture: parts you can color (in drawing order) and lines drawn on top */
+    const PICS = {
+      balloon: { name: 'Balloon', icon: '🎈',
+        defs: '<clipPath id="balclip"><path d="M150,36 C88,36 66,96 84,138 C96,164 124,180 134,194 L166,194 C176,180 204,164 216,138 C234,96 212,36 150,36Z"/></clipPath>',
+        parts: ['<rect x="0" y="0" width="300" height="300"/>', '<circle cx="252" cy="48" r="26"/>', cloud(60, 96), '<path d="M0,256 Q80,222 160,250 T300,244 V300 H0Z"/>',
+          ...[[60, 51], [111, 26], [137, 26], [163, 26], [189, 52]].map(([x, w]) => `<rect x="${x}" y="30" width="${w}" height="170" clip-path="url(#balclip)"/>`),
+          '<rect x="130" y="206" width="40" height="30" rx="5"/>'],
+        lines: '<path d="M150,36 C88,36 66,96 84,138 C96,164 124,180 134,194 L166,194 C176,180 204,164 216,138 C234,96 212,36 150,36Z"/><path d="M134,194 L134,206 M166,194 L166,206"/>' },
+      kite: { name: 'Kite', icon: '🪁',
+        parts: ['<rect x="0" y="0" width="300" height="300"/>', '<circle cx="48" cy="50" r="26"/>', cloud(250, 70), '<path d="M0,262 Q150,238 300,262 V300 H0Z"/>',
+          '<path d="M150,30 L218,110 L150,110Z"/>', '<path d="M150,30 L82,110 L150,110Z"/>', '<path d="M82,110 L150,190 L150,110Z"/>', '<path d="M218,110 L150,190 L150,110Z"/>',
+          bow(132, 214), bow(158, 238), bow(136, 262)],
+        lines: '<path d="M150,190 Q118,212 146,236 T140,286"/>' },
+      rainbow: { name: 'Rainbow', icon: '🌈',
+        parts: ['<rect x="0" y="0" width="300" height="300"/>', '<circle cx="256" cy="46" r="24"/>', ...[0, 1, 2, 3, 4, 5].map(k => ring(134 - k * 17, 117 - k * 17)), '<path d="M0,272 Q150,246 300,272 V300 H0Z"/>', cloud(46, 246), cloud(266, 246)],
+        lines: '' },
+    };
+    const d = api.data || { pic: 'balloon', fills: {} };
+    let cur = 0;
+    const holder = h('div', { class: 'paintpic' });
+    const fills = () => (d.fills[d.pic] = d.fills[d.pic] || {});
+    const sync = () => { api.save(d); api.ready(Object.keys(fills()).length >= 4); };
+    function draw() {
+      const P = PICS[d.pic], f = fills();
+      const parts = P.parts.map((s, i) => s.replace(/^<(\w+)/, `<$1 data-r="${i}" fill="${f[i] != null ? COLORS[f[i]] : '#ffffff'}"`)).join('');
+      holder.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><defs>${P.defs || ''}</defs><g stroke="#3b2a4a" stroke-width="3" stroke-linejoin="round">${parts}</g><g fill="none" stroke="#3b2a4a" stroke-width="3.5" stroke-linecap="round" pointer-events="none">${P.lines}</g></svg>`;
+      [...pics.children].forEach(b => b.classList.toggle('sel', b.dataset.pic === d.pic));
+      sync();
+    }
+    holder.addEventListener('click', e => {
+      const el = e.target.closest('[data-r]'); if (!el) return;
+      fills()[el.dataset.r] = cur; el.setAttribute('fill', COLORS[cur]); Snd.pop(); sync();
+    });
+    const pics = h('div', { class: 'chips' }, Object.entries(PICS).map(([k, P]) =>
+      h('button', { class: 'chip', 'data-pic': k, html: `<span>${P.icon}</span>${esc(P.name)}`, onclick: () => { d.pic = k; Snd.tap(); draw(); } })));
+    const pal = h('div', { class: 'palette' });
+    COLORS.forEach((col, v) => { const b = h('button', { class: 'swatch' + (v === cur ? ' sel' : ''), style: { background: col } }); b.onclick = () => { cur = v; [...pal.children].forEach(c => c.classList.remove('sel')); b.classList.add('sel'); }; pal.append(b); });
+    pal.append(h('button', { class: 'swatch eraser', text: '🗑️', onclick: () => { d.fills[d.pic] = {}; draw(); } }));
+    body.append(pics, holder, pal, h('div', { class: 'ctip', text: 'Pick a color. Then tap a part of the picture. Color 4 parts or more.' }));
+    draw();
   },
 };
