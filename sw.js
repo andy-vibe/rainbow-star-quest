@@ -1,7 +1,7 @@
 /* Service worker: lets the game open with no internet after the first visit.
    Game files: it tries the network first (so new versions show up), but uses the saved copy when offline
    or when the network is too slow. The Axie pictures and icons never change, so the saved copy is used first. */
-const CACHE = 'rainbow-star-quest-v4';
+const CACHE = 'rainbow-star-quest-v5';
 const ART_CACHE = 'rainbow-star-quest-art-v1';   // kept across game versions: change it only when the art files change
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',

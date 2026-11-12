@@ -43,20 +43,47 @@ const Creative = {
     const COLS = 16, ROWS = 11;
     const BLOCKS = ['#6cc24a', '#9b6b43', '#9aa0a6', '#c68f53', '#3fa34d', '#a8e6ff', '#ffffff', '#4aa8ff', '#f1dc9c', '#ffd54a', '#ff8fc7', '#b388ff', '#ef5350', '#3a3a55'];
     let cells = api.data && api.data.length === COLS * ROWS ? api.data.slice() : new Array(COLS * ROWS).fill(-1);
-    let cur = 5, painting = false;
+    let cur = 5;
+    let pen = null, last = -1;       // the one finger (pointerId) that draws, and the last cell it painted
     const grid = h('div', { class: 'bgrid', style: { gridTemplateColumns: `repeat(${COLS}, 1fr)` } });
     const els = cells.map((v, i) => { const c = h('i', { 'data-i': i }); grid.append(c); return c; });
     const paintEl = (el, v) => { el.style.background = v < 0 ? '' : BLOCKS[v]; el.className = v < 0 ? '' : 'on'; };
     const sync = () => { api.save(cells); api.ready(cells.filter(v => v >= 0).length >= 8); };
-    const paint = el => {
-      if (!el || el.parentNode !== grid) return;
-      const i = +el.dataset.i;
+    const paint = i => {
       if (cells[i] === cur) return;
-      cells[i] = cur; paintEl(el, cur); Snd.tap();
+      cells[i] = cur; paintEl(els[i], cur); Snd.tap();
     };
-    grid.addEventListener('pointerdown', e => { painting = true; paint(e.target); e.preventDefault(); });
-    grid.addEventListener('pointermove', e => { if (painting) paint(document.elementFromPoint(e.clientX, e.clientY)); });
-    const stop = () => { if (painting) { painting = false; sync(); } };
+    const cellAt = (x, y) => { const el = document.elementFromPoint(x, y); return el && el.parentNode === grid ? +el.dataset.i : -1; };
+    /* a fast swipe skips cells between two move events: fill the straight line of cells from the last one */
+    const paintTo = i => {
+      if (last < 0) { paint(i); last = i; return; }
+      let c = last % COLS, r = Math.floor(last / COLS);
+      const c1 = i % COLS, r1 = Math.floor(i / COLS), dc = Math.abs(c1 - c), dr = Math.abs(r1 - r), sc = c < c1 ? 1 : -1, sr = r < r1 ? 1 : -1;
+      let err = dc - dr;
+      for (;;) {
+        paint(r * COLS + c);
+        if (c === c1 && r === r1) break;
+        const e2 = 2 * err;
+        if (e2 > -dr) { err -= dr; c += sc; }
+        if (e2 < dc) { err += dc; r += sr; }
+      }
+      last = i;
+    };
+    /* only the first finger draws: a second finger or a resting palm must not paint or stop the drawing */
+    grid.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      if (pen !== null) return;
+      pen = e.pointerId; last = -1;
+      const i = cellAt(e.clientX, e.clientY);
+      if (i >= 0) paintTo(i);
+    });
+    grid.addEventListener('pointermove', e => {
+      if (e.pointerId !== pen) return;
+      const i = cellAt(e.clientX, e.clientY);
+      if (i < 0) last = -1;           // off the board: coming back starts a new line, not one across the gap
+      else paintTo(i);
+    });
+    const stop = e => { if (e.pointerId === pen) { pen = null; sync(); } };
     window.addEventListener('pointerup', stop); window.addEventListener('pointercancel', stop);   // cancel: the system took over the touch
     api.onLeave(() => { window.removeEventListener('pointerup', stop); window.removeEventListener('pointercancel', stop); });
     els.forEach((el, i) => paintEl(el, cells[i]));
