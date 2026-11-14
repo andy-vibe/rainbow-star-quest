@@ -3,7 +3,7 @@
    or when the network is too slow. The Axie pictures and icons never change, so the saved copy is used first.
    GitHub Pages lets browsers keep files for 10 minutes. Game files skip that browser cache (they are checked
    with the server every time), so a new version never mixes new and old files. */
-const CACHE = 'rainbow-star-quest-v7';
+const CACHE = 'rainbow-star-quest-v8';
 const ART_CACHE = 'rainbow-star-quest-art-v1';   // kept across game versions: change it only when the art files change
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',

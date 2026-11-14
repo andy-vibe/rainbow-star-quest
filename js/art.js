@@ -6,9 +6,40 @@ const svgWrap = (inner, vb = '0 -14 200 280') => `<svg class="char" viewBox="${v
 /* eyes that blink (each character blinks at its own time) */
 const eyesG = inner => `<g class="eyes" style="animation-delay:-${(Math.random() * 4.5).toFixed(2)}s">${inner}</g>`;
 
-/* A cute girl character. Options change hair, dress and extras. */
+/* Necklaces hang on a curve under the chin. Bead necklaces hang lower so the beads show below the chin:
+   beadPt(t) walks along their curve from one side of the neck (t=0) to the other (t=1). */
+const NECK_CURVE = 'M76,146 Q100,178 124,146';
+const beadPt = t => [72 + 56 * t, 146 + 84 * t * (1 - t)];
+const beadsAlong = colors => [...Array(13)].map((_, i) => {
+  const [x, y] = beadPt(0.08 + i * 0.07);
+  return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.8" fill="${colors[i % colors.length]}" stroke="rgba(0,0,0,.22)" stroke-width="1"/><circle cx="${(x - 1.2).toFixed(1)}" cy="${(y - 1.3).toFixed(1)}" r="1.1" fill="#fff" opacity=".8"/>`;
+}).join('');
+const starPath = (cx, cy, R, r) => 'M' + [...Array(10)].map((_, i) => {
+  const a = Math.PI / 5 * i - Math.PI / 2, d = i % 2 ? r : R;
+  return (cx + d * Math.cos(a)).toFixed(1) + ',' + (cy + d * Math.sin(a)).toFixed(1);
+}).join(' L') + 'Z';
+const HEART = 'M0,6 C-9,0 -8,-7 -3.5,-7 C-1.5,-7 0,-5.5 0,-4 C0,-5.5 1.5,-7 3.5,-7 C8,-7 9,0 0,6Z';
+Art.neckAcc = {
+  pearls: beadsAlong(['#fff6e6']),
+  beads: beadsAlong(['#ff5fa2', '#ffb347', '#ffd54a', '#3ecf8e', '#4aa8ff', '#8e6bff']),
+  locket: `<path d="${NECK_CURVE}" stroke="#e0a800" stroke-width="2.4" fill="none"/><path d="${HEART}" transform="translate(100,169) scale(1.5)" fill="#ff5fa2" stroke="#e0a800" stroke-width="1.2"/><circle cx="98" cy="166" r="1.6" fill="#fff" opacity=".8"/>`,
+  starpendant: `<path d="${NECK_CURVE}" stroke="#e0a800" stroke-width="2.4" fill="none"/><path d="${starPath(100, 171, 10, 4.4)}" fill="#ffd54a" stroke="#e0a800" stroke-width="1.6" stroke-linejoin="round"/><circle cx="100" cy="171" r="2.2" fill="#fff" opacity=".8"/>`,
+};
+/* Bracelets are drawn flat around (0,0), then turned to sit across each wrist. */
+Art.wristAcc = {
+  bangles: `<rect x="-11" y="-6" width="22" height="4.5" rx="2.2" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2"/><rect x="-11" y="0.5" width="22" height="4.5" rx="2.2" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2"/>`,
+  friendship: ['#ff5fa2', '#ffd54a', '#22c7b8', '#8e6bff'].map((c, i) => `<rect x="${-11 + i * 5.5}" y="-3.5" width="5.5" height="7" fill="${c}"/>`).join('') + `<rect x="-11" y="-3.5" width="22" height="7" rx="2" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="1"/>`,
+  pearlband: [-8.4, -2.8, 2.8, 8.4].map(x => `<circle cx="${x}" cy="0" r="3.4" fill="#fff6e6" stroke="rgba(0,0,0,.25)" stroke-width="1"/><circle cx="${x - 1}" cy="-1.1" r="1" fill="#fff"/>`).join(''),
+  charm: `<rect x="-11" y="-2.2" width="22" height="4.4" rx="2.2" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2"/><path d="${HEART}" transform="translate(0,7.5) scale(.75)" fill="#ff5fa2" stroke="#e0407f" stroke-width="1.2"/>`,
+};
+/* a small picture of a necklace or bracelet, for the shop */
+Art.accIcon = (slot, id) => slot === 'neck'
+  ? `<svg viewBox="70 144 60 34" xmlns="http://www.w3.org/2000/svg">${Art.neckAcc[id] || ''}</svg>`
+  : `<svg viewBox="-15 -10 30 24" xmlns="http://www.w3.org/2000/svg">${Art.wristAcc[id] || ''}</svg>`;
+
+/* A cute girl character. Options change hair, dress, shoes and extras. */
 Art.chibi = function (o) {
-  o = Object.assign({ skin: '#ffe0c8', hair: '#5b3a29', style: 'long', dress: '#ff7eb6', trim: '#ffffff', head: null, back: null, hand: null, mood: 'happy', extra: '' }, o);
+  o = Object.assign({ skin: '#ffe0c8', hair: '#5b3a29', style: 'long', dress: '#ff7eb6', trim: '#ffffff', shoes: '#7a4b8c', head: null, back: null, hand: null, neck: null, wrist: null, mood: 'happy', extra: '' }, o);
   const H = o.hair, K = o.skin;
   const base = `<path d="M38,98 Q34,28 100,26 Q166,28 162,98 Q160,126 150,136 L50,136 Q40,126 38,98Z" fill="${H}"/>`;
   const backHair = {
@@ -50,15 +81,22 @@ Art.chibi = function (o) {
     lightstick: `<line x1="152" y1="194" x2="168" y2="158" stroke="#fff" stroke-width="6" stroke-linecap="round"/><text x="154" y="156" font-size="30">💖</text>`,
   }[o.hand] || '';
 
+  const neckAcc = Art.neckAcc[o.neck] || '';
+  const w = Art.wristAcc[o.wrist];
+  const wristAcc = w ? `<g transform="translate(56,183) rotate(38)">${w}</g><g transform="translate(144,183) rotate(-38)">${w}</g>` : '';
+
   return svgWrap(`
     ${backAcc}${backHair}
     <rect x="80" y="224" width="14" height="24" rx="6" fill="${K}"/><rect x="106" y="224" width="14" height="24" rx="6" fill="${K}"/>
-    <ellipse cx="85" cy="251" rx="14" ry="7.5" fill="#7a4b8c"/><ellipse cx="115" cy="251" rx="14" ry="7.5" fill="#7a4b8c"/>
+    <ellipse cx="85" cy="251" rx="14" ry="7.5" fill="${o.shoes}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/><ellipse cx="115" cy="251" rx="14" ry="7.5" fill="${o.shoes}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>
+    <ellipse cx="80" cy="248" rx="4.5" ry="2" fill="#fff" opacity=".45"/><ellipse cx="110" cy="248" rx="4.5" ry="2" fill="#fff" opacity=".45"/>
     <path d="M76,156 L50,190" stroke="${o.dress}" stroke-width="17" stroke-linecap="round"/><path d="M124,156 L150,190" stroke="${o.dress}" stroke-width="17" stroke-linecap="round"/>
     <circle cx="48" cy="194" r="9.5" fill="${K}"/><circle cx="152" cy="194" r="9.5" fill="${K}"/>
+    ${wristAcc}
     <path d="M74,148 Q100,138 126,148 L152,222 Q100,238 48,222 Z" fill="${o.dress}"/>
     <path d="M48,222 Q100,238 152,222 L155,231 Q100,248 45,231 Z" fill="${o.trim}"/>
     <path d="M84,146 Q100,160 116,146" stroke="${o.trim}" stroke-width="6" fill="none" stroke-linecap="round"/>
+    ${neckAcc}
     <circle cx="100" cy="95" r="58" fill="${K}"/>
     <ellipse cx="60" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/><ellipse cx="140" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/>
     ${eyesG(`<ellipse cx="78" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/><ellipse cx="122" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/>

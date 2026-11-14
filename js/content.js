@@ -395,4 +395,12 @@ const SHOP = [
   { id: 'lightstick', name: 'Heart Stick', slot: 'hand', cost: 45 },
   { id: 'cape', name: 'Hero Cape', slot: 'back', cost: 60 },
   { id: 'wings', name: 'Fairy Wings', slot: 'back', cost: 100 },
+  { id: 'pearls', name: 'Pearl Necklace', slot: 'neck', cost: 30 },
+  { id: 'beads', name: 'Rainbow Beads', slot: 'neck', cost: 35 },
+  { id: 'locket', name: 'Heart Locket', slot: 'neck', cost: 50 },
+  { id: 'starpendant', name: 'Star Necklace', slot: 'neck', cost: 70 },
+  { id: 'friendship', name: 'Friendship Band', slot: 'wrist', cost: 20 },
+  { id: 'bangles', name: 'Gold Bangles', slot: 'wrist', cost: 30 },
+  { id: 'pearlband', name: 'Pearl Bracelet', slot: 'wrist', cost: 35 },
+  { id: 'charm', name: 'Heart Charm', slot: 'wrist', cost: 45 },
 ];

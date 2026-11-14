@@ -96,21 +96,22 @@ const LOOKS = {
   hair: ['#2b2b3a', '#5b3a29', '#b5651d', '#f2c94c', '#f4f1ec', '#ff7eb6', '#8e6bff', '#22c7b8'],
   style: ['long', 'bob', 'buns', 'twin', 'pony'],
   dress: ['#ff7eb6', '#8e6bff', '#4aa8ff', '#3ecf8e', '#ffb347', '#ef5350'],
+  shoes: ['#7a4b8c', '#ff4d9d', '#ef5350', '#ffb347', '#ffd54a', '#3ecf8e', '#4aa8ff', '#ffffff', '#2b2b3a'],
 };
 function lookPickers(hero, redraw) {
   const rowOf = (title, key, isColor) => {
     const chips = h('div', { class: 'chips' });
     LOOKS[key].forEach(v => {
-      const b = h('button', isColor ? { class: 'dot' + (hero[key] === v ? ' sel' : ''), style: { background: v } } : { class: 'chip' + (hero[key] === v ? ' sel' : ''), text: cap(v) });
+      const b = h('button', isColor ? { class: 'dot' + ((hero[key] || LOOKS[key][0]) === v ? ' sel' : ''), style: { background: v } } : { class: 'chip' + (hero[key] === v ? ' sel' : ''), text: cap(v) });
       b.onclick = () => { hero[key] = v; [...chips.children].forEach(x => x.classList.remove('sel')); b.classList.add('sel'); Snd.pop(); redraw(); };
       chips.append(b);
     });
     return h('div', { class: 'pickrow' }, h('h4', { text: title }), chips);
   };
-  return [rowOf('Hair style', 'style'), rowOf('Hair color', 'hair', true), rowOf('Dress color', 'dress', true), rowOf('Skin', 'skin', true)];
+  return [rowOf('Hair style', 'style'), rowOf('Hair color', 'hair', true), rowOf('Dress color', 'dress', true), rowOf('Shoe color', 'shoes', true), rowOf('Skin', 'skin', true)];
 }
 function heroMaker(first) {
-  const hero = S().hero ? Object.assign({}, S().hero) : { name: '', skin: LOOKS.skin[0], hair: LOOKS.hair[1], style: 'long', dress: LOOKS.dress[0], trim: '#ffffff', head: null, back: null, hand: null };
+  const hero = S().hero ? Object.assign({}, S().hero) : { name: '', skin: LOOKS.skin[0], hair: LOOKS.hair[1], style: 'long', dress: LOOKS.dress[0], trim: '#ffffff', shoes: LOOKS.shoes[0], head: null, back: null, hand: null, neck: null, wrist: null };
   const prev = h('div', { class: 'heroprev' });
   const redraw = () => { prev.innerHTML = Art.chibi(hero); };
   const nameIn = h('input', { class: 'nameinput', maxlength: 12, placeholder: 'Your name', value: hero.name });
@@ -387,7 +388,7 @@ function wardrobe() {
     shop.replaceChildren(...SHOP.map(it => {
       const own = S().owned.includes(it.id), on = hero[it.slot] === it.id;
       const b = h('button', { class: 'shopitem' + (on ? ' on' : '') + (own ? ' own' : '') },
-        h('div', { class: 'em', text: ITEM_ICON[it.id] }), h('b', { text: it.name }),
+        h('div', { class: 'em', html: ITEM_ICON[it.id] || Art.accIcon(it.slot, it.id) }), h('b', { text: it.name }),
         h('small', { text: on ? 'Wearing ✔' : own ? 'Tap to wear' : `💎 ${it.cost}` }));
       b.onclick = () => {
         if (!own) {
