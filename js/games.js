@@ -87,6 +87,13 @@ const W = {
       visual: `<div class="bigpic">${e}</div><div class="bigword">${a} + <span class="gap">?</span></div><div class="hintline">Two small words can make one big word.</div>`,
       options: wordChoices(b, [w1, w2]), after: `${a} + ${b} = ${a}${b}` };
   },
+  /* clap the beats (syllables) */
+  beats() {
+    const [parts, e] = pick(BEATS), w = parts.replace(/-/g, ''), n = parts.split('-').length;
+    return { key: 'y' + w, subj: 'words', kind: 'choice', optClass: 'nums', prompt: `Clap the word "${w}". How many beats does it have?`, hear: parts.replace(/-/g, ' '),
+      visual: `<div class="bigpic">${e}</div><div class="bigword">${w}</div><div class="hintline">Clap once for each part as you say it: oc-to-pus is 3 claps.</div>`,
+      options: [1, 2, 3, 4].map(k => ({ label: String(k), correct: k === n })), after: `${parts}: ${n} beat${n > 1 ? 's' : ''}` };
+  },
 };
 Gen.words = tier => fill([
   [() => W.spell(3), () => W.match([3]), () => W.spell(3), () => W.missing(3), () => W.spell(3), () => W.match([3, 4]), () => W.spell(3), () => W.missing(3)],
@@ -95,6 +102,7 @@ Gen.words = tier => fill([
   [() => W.spell(6), () => W.opposite(), () => W.missing(6), () => W.spell(6, 1), () => W.rhyme(), () => W.spell(5, 2), () => W.spell(6, 2), () => W.match([6, 7])],
   [() => W.spell(7), () => W.opposite(), () => W.spell(6, 2), () => W.missing(7), () => W.spell(7, 1), () => W.rhyme(), () => W.spell(7, 2), () => W.spell(6, 2)],
   [() => W.spell(8), () => W.compound(), () => W.missing(8), () => W.spell(7, 2), () => W.opposite(), () => W.compound(), () => W.spell(8, 1), () => W.match([7, 8])],
+  [() => W.spell(8, 2), () => W.beats(), () => W.compound(), () => W.spell(7, 2), () => W.beats(), () => W.missing(8), () => W.opposite(), () => W.beats()],
 ][tier - 1]);
 
 /* run each maker; try again if we already have the same question */
@@ -144,11 +152,12 @@ Gen.sentences = tier => fill([
   [() => S_.order(4), () => S_.blank('hard'), () => S_.punct(), () => S_.order(4), () => S_.blank('mid'), () => S_.order(4), () => S_.blank('hard')],
   [() => S_.order(5), () => S_.blank('hard'), () => S_.order(5), () => S_.punct(), () => S_.blank('hard'), () => S_.order(5), () => S_.order(5)],
   [() => S_.order(6), () => S_.blank('top'), () => S_.punct(), () => S_.order(6), () => S_.blank('top'), () => S_.order(6), () => S_.blank('hard')],
+  [() => S_.order(7), () => S_.blank('deep'), () => S_.punct(), () => S_.order(7), () => S_.blank('deep'), () => S_.order(7), () => S_.blank('deep')],
 ][tier - 1]);
 
 /* ================= MATH ================= */
-const THINGS = [['🍪', 'cookies'], ['⭐', 'stars'], ['🧊', 'ice blocks'], ['🎈', 'balloons'], ['🐟', 'fish'], ['💎', 'gems'], ['🌸', 'flowers'], ['🧱', 'bricks']];
-const NAMES = ['Lumi', 'Pix', 'Nova', 'Mochi', 'Sora'];
+const THINGS = [['🍪', 'cookies'], ['⭐', 'stars'], ['🧊', 'ice blocks'], ['🎈', 'balloons'], ['🐟', 'fish'], ['💎', 'gems'], ['🌸', 'flowers'], ['🧱', 'bricks'], ['🐚', 'shells']];
+const NAMES = ['Lumi', 'Pix', 'Nova', 'Mochi', 'Sora', 'Shelly'];
 const M = {
   count(max) {
     const n = rand(Math.max(3, max - 9), max), e = pick(THINGS)[0];
@@ -247,6 +256,25 @@ const M = {
     return { key: 'h' + n, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `Share ${n} ${thing} fairly between 2 friends. How many does each friend get?`,
       visual: emojis(e, n) + '<div class="hintline">Fair means both friends get the same.</div>', options: numChoices(n / 2), after: `Half of ${n} is ${n / 2}.` };
   },
+  /* rows of things: the first step to times tables (the 2, 3, 4, 5 and 10 tables) */
+  times() {
+    const r = rand(2, 5), n = pick([2, 3, 4, 5, 10]), [e, thing] = pick(THINGS);
+    return { key: `t${r}x${n}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `${r} rows of ${n} ${thing}. How many in all?`, say: `${r} rows of ${n} ${thing}. What is ${r} times ${n}?`,
+      visual: `<div class="rows">${Array.from({ length: r }, () => emojis(e, n)).join('')}</div>${eq(`${r} × ${n} = ?`)}`,
+      options: numChoices(r * n), after: `${r} times ${n} is ${r * n}.` };
+  },
+  timesFact() {
+    const n = pick([2, 5, 10]), a = rand(2, 10);
+    return { key: `t${a}x${n}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `What is ${a} × ${n}?`, say: `What is ${a} times ${n}? Count by ${n}s, ${a} times.`,
+      visual: `${eq(`${a} × ${n} = ?`)}<div class="hintline">Count by ${n}s: ${Array.from({ length: 3 }, (_, k) => (k + 1) * n).join(', ')}...</div>`,
+      options: numChoices(a * n), after: `${a} times ${n} is ${a * n}.` };
+  },
+  /* share fairly: the first step to dividing */
+  share() {
+    const k = pick([3, 4]), each = rand(2, 5), n = k * each, [e, thing] = pick(THINGS);
+    return { key: `q${n}/${k}`, subj: 'math', kind: 'choice', optClass: 'nums', prompt: `Share ${n} ${thing} fairly between ${k} friends. How many does each friend get?`,
+      visual: emojis(e, n) + `<div class="hintline">Give one to each friend, again and again, until they are all gone.</div>`, options: numChoices(each), after: `${n} shared by ${k} is ${each} each.` };
+  },
   /* number makers */
   add10: () => { const a = rand(1, 8); return M.add(a, rand(1, 10 - a)); },
   sub10: () => { const a = rand(3, 10); return M.sub(a, rand(1, a - 1)); },
@@ -270,6 +298,7 @@ Gen.math = tier => fill([
   [() => M.add2d2d(), () => M.add2d1dR(), () => M.sub2d1dR(), () => M.subTens(), () => { const o = rand(0, 6), a = rand(2, 7) * 10 + o; return M.buildSum(a, rand(1, 9 - o)); }, () => M.word(50), () => M.add2d2d(), () => M.cmpSym()],
   [() => M.add2d2dR(), () => M.sub2d2d(), () => M.missing(), () => M.word(100), () => { const t1 = rand(1, 5), o1 = rand(1, 7); return M.buildSum(t1 * 10 + o1, rand(1, 8 - t1) * 10 + rand(1, 9 - o1)); }, () => M.add2d2dR(), () => M.sub2d2d(), () => M.skip(pick([-10, -5, -2]))],
   [() => M.groups(), () => M.add2d2dR(), () => M.double(), () => M.sub2d2dR(), () => M.half(), () => M.groups(), () => M.skip(pick([3, 4]), 40), () => M.word(100)],
+  [() => M.times(), () => M.share(), () => M.timesFact(), () => M.word(100), () => M.times(), () => M.share(), () => M.missing(), () => M.timesFact()],
 ][tier - 1]);
 
 /* ================= SCIENCE ================= */

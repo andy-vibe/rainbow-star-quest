@@ -30,11 +30,16 @@ const COMPOUNDS = [
   ['rain', 'bow', '🌈', 'pig', 'cup'], ['sun', 'flower', '🌻', 'boat', 'ring'], ['snow', 'man', '⛄', 'pen', 'cup'], ['cup', 'cake', '🧁', 'dog', 'sun'],
   ['pop', 'corn', '🍿', 'fish', 'hat'], ['butter', 'fly', '🦋', 'cow', 'dog'], ['tooth', 'brush', '🪥', 'cake', 'bus'], ['foot', 'ball', '🏈', 'hen', 'cup'],
   ['pan', 'cake', '🥞', 'ring', 'bed'], ['skate', 'board', '🛹', 'cat', 'hat'], ['sun', 'glasses', '😎', 'pig', 'bus'], ['lady', 'bug', '🐞', 'cup', 'sock'],
-  ['air', 'plane', '✈️', 'dog', 'pen'], ['water', 'melon', '🍉', 'bus', 'hen'], ['snow', 'flake', '❄️', 'bat', 'hen'], ['hand', 'bag', '👜', 'egg', 'cow'],
+  ['sail', 'boat', '⛵', 'cup', 'hen'], ['sea', 'shell', '🐚', 'pig', 'bus'], ['air', 'plane', '✈️', 'dog', 'pen'], ['water', 'melon', '🍉', 'bus', 'hen'], ['snow', 'flake', '❄️', 'bat', 'hen'], ['hand', 'bag', '👜', 'egg', 'cow'],
 ];
+/* Clap the beats (syllables): the word with a dash between the beats, and a picture */
+const BEATS = [['fish', '🐟'], ['crab', '🦀'], ['whale', '🐳'], ['shark', '🦈'], ['shell', '🐚'], ['boat', '⛵'],
+  ['tur-tle', '🐢'], ['dol-phin', '🐬'], ['lob-ster', '🦞'], ['sea-weed', '🌿'], ['sail-boat', '⛵'], ['pen-guin', '🐧'],
+  ['oc-to-pus', '🐙'], ['ba-na-na', '🍌'], ['di-no-saur', '🦕'], ['kan-ga-roo', '🦘'], ['el-e-phant', '🐘'], ['but-ter-fly', '🦋'], ['um-brel-la', '☂️'],
+  ['wa-ter-mel-on', '🍉'], ['cat-er-pil-lar', '🐛'], ['al-li-ga-tor', '🐊'], ['hel-i-cop-ter', '🚁']];
 
 /* ---------- SENTENCES ---------- */
-/* Put the words in order. One list for each difficulty step (1 to 6). */
+/* Put the words in order. One list for each difficulty step (1 to 7). */
 const SENT_ORDER = {
   1: [['I see a cat.', '🐱'], ['The sun is hot.', '☀️'], ['The dog can run.', '🐶'], ['We play ball.', '⚽'], ['I am happy.', '😊'], ['The fish can swim.', '🐟'], ['It is a hat.', '🎩'], ['The bee is small.', '🐝'], ['I love my mom.', '❤️'], ['The frog can jump.', '🐸'], ['Snow is cold.', '❄️'], ['I like red apples.', '🍎']],
   2: [['My dog likes to play.', '🐶'], ['I can see the moon.', '🌙'], ['She has a red ball.', '🔴'], ['We go to the park.', '🌳'], ['The duck swims in water.', '🦆'], ['He eats a big cake.', '🎂'], ['I like to read books.', '📖'], ['The star is very bright.', '⭐'], ['My cat drinks milk.', '🥛'], ['The bus is yellow.', '🚌'], ['Bears like to eat fish.', '🐻'], ['The snow is so soft.', '❄️']],
@@ -42,13 +47,15 @@ const SENT_ORDER = {
   4: [['The brave girl sings a happy song.', '🎤'], ['My little kitten likes to chase butterflies.', '🦋'], ['We build a tall tower with blocks.', '🧱'], ['The snow falls softly on the hill.', '🏔️'], ['Do you want to play with me?', '🤝'], ['The penguin slides down the icy hill.', '🐧'], ['I gave my friend a big hug.', '🤗'], ['The singer danced on the bright stage.', '💃'], ['A rainbow comes out after the rain.', '🌈']],
   5: [['The stars come out when it is dark.', '🌟'], ['My friends and I love to sing together.', '🎶'], ['The little kitten found a shiny gold key.', '🔑'], ['We can do anything if we work together.', '💪'], ['The ice castle sparkles in the morning sun.', '🏰'], ['Why do the birds fly south in winter?', '🐦'], ['Plants need water and sunlight to grow big.', '🌱'], ['The brave princess was not afraid of mistakes.', '👑']],
   6: [['The little dragon practiced flying every single day.', '🐉'], ['We saw a rainbow after the big storm.', '🌈'], ['My kite flew high above the fluffy clouds.', '🪁'], ['If you keep trying, you will get better.', '💪'], ['The wind blew my hat into the tree.', '🎩'], ['Can we fly to the islands in the sky?', '☁️'], ['Lightning flashed and then the thunder boomed.', '⚡'], ['The hot air balloon floated over the town.', '🎈'], ['My grandma and I baked cookies for everyone.', '🍪'], ['When it rains, I wear my yellow boots.', '🌧️'], ['Friends help each other when things are hard.', '🤝']],
+  7: [['The little turtle swam slowly to the coral reef.', '🐢'], ['Dolphins jump out of the water to say hello.', '🐬'], ['We found a pink shell on the sandy beach.', '🐚'], ['The octopus hid behind a rock when the shark came.', '🐙'], ['If we go slow and careful, we can do it.', '🐢'], ['A big whale sang a song deep in the sea.', '🐳'], ['The crab walks sideways across the wet sand.', '🦀'], ['Can you see the tiny fish in the seaweed?', '🐟'], ['My friends and I built a castle in the sand.', '🏖️'], ['The sun was setting when the boat came home.', '⛵']],
 };
-/* Pick the right word: [sentence, right, wrong, wrong]. Four groups: easy, middle, hard, top. */
+/* Pick the right word: [sentence, right, wrong, wrong]. Five groups: easy, middle, hard, top, deep. */
 const SENT_BLANK = {
   easy: [['The cat ___ big.', 'is', 'are', 'am'], ['I ___ a girl.', 'am', 'is', 'are'], ['The dogs ___ running.', 'are', 'is', 'am'], ['A fish can ___.', 'swim', 'fly', 'sing'], ['The sun is ___.', 'hot', 'cold', 'wet'], ['Ice is ___.', 'cold', 'hot', 'loud'], ['I see with my ___.', 'eyes', 'ears', 'nose'], ['A frog can ___.', 'jump', 'read', 'drive'], ['We ___ to school.', 'go', 'goes', 'going'], ['I hear with my ___.', 'ears', 'eyes', 'hands']],
   mid: [['She ___ a red hat.', 'has', 'have', 'having'], ['They ___ playing in the snow.', 'are', 'is', 'am'], ['The kitten ___ milk every day.', 'drinks', 'drink', 'drinking'], ['Yesterday we ___ to the park.', 'went', 'go', 'goes'], ['He ___ very fast.', 'runs', 'run', 'running'], ['I have two ___.', 'cats', 'cat', 'cates'], ['The girl ___ a song.', 'sings', 'sing', 'singing'], ['We ___ happy today.', 'are', 'is', 'am'], ['The snow ___ white.', 'is', 'are', 'be'], ['Birds ___ in the sky.', 'fly', 'flies', 'flying']],
   hard: [['Yesterday I ___ a snowman.', 'built', 'build', 'builds'], ['The cat is ___ than the mouse.', 'bigger', 'big', 'biggest'], ['The turtle walks ___.', 'slowly', 'slow', 'slower'], ['We ___ going to build a castle.', 'are', 'is', 'am'], ['The girls ___ their song last night.', 'sang', 'sing', 'sings'], ['This is the ___ tower in the valley.', 'tallest', 'tall', 'taller'], ['I ___ my teeth every morning.', 'brush', 'brushes', 'brushing'], ['Mochi ___ not like the rain.', 'does', 'do', 'doing'], ['There ___ three birds in the tree.', 'are', 'is', 'am'], ['Tomorrow we ___ visit the castle.', 'will', 'did', 'was']],
   top: [['I wore a coat ___ it was cold.', 'because', 'but', 'or'], ['Sora wanted to fly, ___ her wings were too small.', 'but', 'because', 'or'], ['Do you want milk ___ juice?', 'or', 'but', 'because'], ['It was raining, ___ we stayed inside.', 'so', 'but', 'or'], ['Yesterday we ___ a rainbow.', 'saw', 'see', 'seen'], ['Last night the wind ___ very hard.', 'blew', 'blow', 'blowed'], ['Nova and Lumi are friends. ___ like to sing.', 'They', 'She', 'He'], ['This is my book. It is ___.', 'mine', 'me', 'my'], ['Sora ___ over the clouds this morning.', 'flew', 'fly', 'flied'], ['Two ___ sat on the fence.', 'mice', 'mouses', 'mouse'], ['The storm was ___ than the rain.', 'louder', 'loud', 'loudest'], ['There are many ___ in the sky.', 'clouds', 'cloud', 'cloudes']],
+  deep: [['The fish swam ___ than the turtle.', 'faster', 'fast', 'fastest'], ['The whale is the ___ animal in the sea.', 'biggest', 'big', 'bigger'], ['Shelly ___ her friends yesterday.', 'helped', 'help', 'helps'], ['I ___ seen a dolphin before.', 'have', 'has', 'having'], ['Three ___ sat on the rock.', 'crabs', 'crab', 'crabes'], ['We ___ swimming when the rain started.', 'were', 'was', 'are'], ["Shelly ___ swim fast, but she is careful.", "can't", "don't", "isn't"], ['The sea is ___ today than yesterday.', 'calmer', 'calm', 'calmest'], ['Yesterday the children ___ shells on the beach.', 'found', 'finded', 'finds'], ['A dolphin ___ to breathe air.', 'needs', 'need', 'needing'], ['Her shell is ___ than my shell.', 'prettier', 'prettiest', 'pretty'], ['Spike puffed up ___ it was scared.', 'because', 'but', 'or']],
 };
 /* Which mark goes at the end? */
 const SENT_PUNCT = [['What is your name', '?'], ['I like ice cream', '.'], ['Wow, that is amazing', '!'], ['Where is the kitten', '?'], ['The sky is blue', '.'], ['Watch out', '!'], ['Can you help me', '?'], ['We are friends', '.'], ['How old are you', '?'], ['Hooray, we did it', '!'], ['My hat is pink', '.'], ['Who took the star', '?']];
@@ -78,6 +85,9 @@ const SCI_SORT = [
   { tier: 6, q: 'What do you wear in this weather?', bins: ['☀️ Sunny', '🌧️ Rainy', '❄️ Snowy'], items: [['😎', 'sunglasses', 0], ['👒', 'sun hat', 0], ['🩳', 'shorts', 0], ['🧴', 'sunscreen', 0], ['☂️', 'umbrella', 1, 'An umbrella keeps the rain off your head.'], ['👢', 'rain boots', 1], ['🧤', 'mittens', 2], ['🧣', 'scarf', 2], ['🛷', 'sled', 2]] },
   { tier: 6, q: 'Can it fly?', bins: ['🕊️ Can fly', '🚶 Can not fly'], items: [['🦅', 'eagle', 0], ['🐝', 'bee', 0], ['🦋', 'butterfly', 0], ['🦇', 'bat', 0, 'Bats are mammals, and they can really fly.'], ['🦉', 'owl', 0], ['🐧', 'penguin', 1, 'Penguins have wings, but they use them to swim.'], ['🐶', 'dog', 1], ['🐌', 'snail', 1], ['🐢', 'turtle', 1], ['🐘', 'elephant', 1]] },
   { tier: 6, q: 'Which sense do you use?', bins: ['👀 See', '👂 Hear', '👃 Smell'], items: [['🌈', 'a rainbow', 0], ['⭐', 'the stars', 0], ['⚡', 'lightning', 0], ['🔔', 'a bell', 1], ['🥁', 'a drum', 1], ['🌩️', 'thunder', 1, 'We see lightning and we hear thunder.'], ['🌹', 'a rose', 2], ['🧄', 'garlic', 2], ['🍪', 'fresh cookies', 2]] },
+  { tier: 7, q: 'Where does it live?', bins: ['🌊 In the sea', '🌳 On land'], items: [['🐙', 'octopus', 0], ['🦈', 'shark', 0], ['🐬', 'dolphin', 0], ['🦀', 'crab', 0], ['🐳', 'whale', 0], ['🦞', 'lobster', 0], ['🦁', 'lion', 1], ['🐘', 'elephant', 1], ['🐿️', 'squirrel', 1], ['🐄', 'cow', 1], ['🦒', 'giraffe', 1]] },
+  { tier: 7, q: 'Fish or mammal?', bins: ['🐟 Fish', '🐳 Mammal'], items: [['🦈', 'shark', 0, 'Sharks are fish. They breathe under water with gills.'], ['🐠', 'clownfish', 0], ['🐡', 'pufferfish', 0], ['🐟', 'tuna', 0], ['🐳', 'whale', 1, 'Whales are mammals. They come up to breathe air.'], ['🐬', 'dolphin', 1], ['🦭', 'seal', 1], ['🐋', 'blue whale', 1]] },
+  { tier: 7, q: 'Does it have a shell?', bins: ['🐚 Has a shell', '💦 No shell'], items: [['🐢', 'turtle', 0], ['🦀', 'crab', 0], ['🐌', 'snail', 0], ['🦞', 'lobster', 0], ['🐚', 'clam', 0], ['🐙', 'octopus', 1, 'An octopus has no shell, so it can squeeze into tiny holes!'], ['🐟', 'fish', 1], ['🐬', 'dolphin', 1], ['🦑', 'squid', 1]] },
 ];
 /* Put in order: tier, question, steps [picture, name] in the right order */
 const SCI_ORDER = [
@@ -96,6 +106,8 @@ const SCI_ORDER = [
   { tier: 6, q: 'The moon looks bigger each night. Put it in order.', steps: [['🌑', 'dark moon'], ['🌒', 'thin moon'], ['🌓', 'half moon'], ['🌕', 'full moon']] },
   { tier: 6, q: 'A storm, from start to end.', steps: [['☁️', 'dark clouds'], ['⚡', 'lightning'], ['💥', 'thunder'], ['🌈', 'rainbow']] },
   { tier: 6, q: 'The colors of a rainbow. Start at the top.', steps: [['🟥', 'red'], ['🟧', 'orange'], ['🟨', 'yellow'], ['🟩', 'green'], ['🟦', 'blue'], ['🟪', 'purple']] },
+  { tier: 7, q: 'How does a sea turtle grow up?', steps: [['🥚', 'egg in the sand'], ['🐢', 'baby turtle'], ['🌊', 'swims to the sea'], ['💪', 'big turtle']] },
+  { tier: 7, q: 'Where does rain come from? Start with the sea.', steps: [['🌊', 'sea water'], ['☀️', 'the sun warms it'], ['☁️', 'it makes a cloud'], ['🌧️', 'rain falls']] },
 ];
 /* Quiz: [question, right, wrong, wrong, fun fact] */
 const SCI_QUIZ = {
@@ -167,6 +179,18 @@ const SCI_QUIZ = {
     ['What do your lungs do?', 'help you breathe', 'help you see', 'help you walk', 'Your lungs fill up with air like two balloons.'],
     ['What helps a bird fly?', '🪶 feathers and wings', '🐾 paws', '🐚 a shell', 'Feathers are light but strong.'],
   ],
+  7: [
+    ['How do fish breathe under water?', 'with gills', 'with a nose', 'they hold their breath', 'Gills take the air out of the water.'],
+    ['Why is the sea salty?', 'Rivers carry salt from rocks to the sea', 'Fish cry salty tears', 'People pour salt in it', 'The salt comes from rocks, a tiny bit at a time.'],
+    ['What is the biggest animal ever?', '🐋 the blue whale', '🐘 the elephant', '🦕 a dinosaur', 'A blue whale is longer than two buses!'],
+    ['How many arms does an octopus have?', '8', '6', '10', 'An octopus can taste things with its arms!'],
+    ['What is a coral reef?', 'a home built by tiny sea animals', 'a big rock', 'a sunken ship', 'Corals are tiny animals. Their homes make the reef.'],
+    ['What do sea turtles eat?', 'sea grass and jellyfish', 'pizza', 'sand', 'Sea turtles can live for more than 50 years!'],
+    ['What makes waves in the sea?', '💨 the wind', '🐟 fish swimming fast', '☀️ the hot sun', 'Wind blowing over the water makes waves.'],
+    ['What pulls the sea up and down every day?', '🌙 the moon', '⭐ the stars', '🐳 the whales', 'This is called the tide. The moon gently pulls on the sea.'],
+    ['Which animal carries its home on its back?', '🐢 turtle', '🐬 dolphin', '🦈 shark', 'A turtle can not take off its shell. It grows with the turtle.'],
+    ['Why do dolphins swim up to the top?', 'to breathe air', 'to see the sun', 'to sleep', 'Dolphins breathe through a hole on top of their head.'],
+  ],
 };
 
 /* ---------- WORLDS, LEVELS AND STORY ---------- */
@@ -226,6 +250,15 @@ const WORLDS = [
       { t: 'sentences', name: 'Sky Mail', icon: '📝', intro: 'Birds carry letters here. Fix the sentences!' },
       { t: 'creative', tool: 'paint', name: 'Paint the Sky', icon: '🎨', intro: 'Use your ideas!', prompt: 'Color a picture for Sora. Use any colors you like!' },
       { t: 'boss', name: 'Stormy', icon: '⛈️', intro: 'Stormy rumbles in the clouds. Cheer Stormy up!' },
+    ] },
+  { id: 'sea', name: 'Coral Cove', emoji: '🐠', host: 'shelly', tier: 7, float: ['🐟', '🐠', '🐚', '✨', '🐡'], gloom: { puffer: true }, badge: '🐚',
+    levels: [
+      { t: 'math', name: 'Shell Rows', icon: '🔢', intro: 'I put my shells in rows. Rows help us count fast!' },
+      { t: 'words', name: 'Splash Words', icon: '🔤', intro: 'Clap the beats and spell the long sea words!' },
+      { t: 'science', name: 'Under the Sea', icon: '🔬', intro: 'Who lives in the sea? Let us find out!' },
+      { t: 'sentences', name: 'Message in a Bottle', icon: '📝', intro: 'A bottle floated in! Fix the sentences inside.' },
+      { t: 'creative', tool: 'aquarium', name: 'Fish Tank', icon: '🎨', intro: 'Use your ideas!', prompt: 'Fill a fish tank for Shelly. Who will swim in it?' },
+      { t: 'boss', name: 'Spike', icon: '🐡', intro: 'Spike puffs up in the deep sea. Cheer Spike up!' },
     ] },
 ];
 /* The first 5 worlds each hide a shard of the Rainbow Star. The worlds after them are new adventures. */
@@ -368,6 +401,30 @@ const STORY = {
     ['narr', 'Now Stormy makes soft rain for the flowers. And after the rain...', null, 'rain'],
     ['fx', 'rainbow'],
     ['twinkle', 'You did it, {name}! Sky Islands is bright again!', 'happy', 'party'],
+    ['sora', 'Look down there! The sea under the islands is so dark. I can fly you there!', 'happy'],
+  ],
+  'sea-in': [
+    ['twinkle', 'Splash! Sora flew us all the way down to the sea.', 'happy', 'bubbles'],
+    ['twinkle', 'Welcome to Coral Cove! But where are all the fish?', 'sad'],
+    ['narr', 'The fish are hiding. Something spiky swims in the deep water.'],
+    ['shelly', 'Oh! Hi... I am Shelly. I am a sea turtle.', 'sad'],
+    ['shelly', 'I want to help my friends. But I am too slow. Everyone swims past me.', 'sad', 'slowswim'],
+    ['hero', 'Slow is OK! Slow means careful. Careful can be a super power.'],
+    ['shelly', 'A super power? Me? OK... let us try together!', 'happy'],
+  ],
+  'sea-boss': [
+    ['spike', 'PUFF! Stay away! Everyone swims away from me anyway!', null, 'puffup'],
+    ['twinkle', 'That is Spike. In the big storm, a tiny Gloom fell into the sea. Now it puffs up like a pufferfish!'],
+    ['shelly', 'Everyone swims too fast for Spike. Maybe slow and careful can help.', 'happy'],
+  ],
+  'sea-out': [
+    ['fx', 'unpuff'],
+    ['spike', 'You swam slow... so I was not scared. You stayed with me!'],
+    ['hero', 'You were scared, and that is OK. Now we can all be friends!'],
+    ['shelly', 'Slow and careful helped! I am proud of me.', 'happy'],
+    ['fx', 'powerup', 'shelly'],
+    ['narr', 'The fish came out to play again, and the reef was full of color.', null, 'bubbles'],
+    ['twinkle', 'You did it, {name}! Coral Cove is bright again!', 'happy', 'party'],
   ],
 };
 
@@ -378,10 +435,13 @@ const FRIENDS = [
   { id: 'nova', name: 'Nova', world: 2, about: 'A singer in the Starlights band.', before: 'She is too shy to sing.', after: 'She found her voice with help from friends.', power: 'Star Mic' },
   { id: 'mochi', name: 'Mochi', world: 3, about: 'A kitten who loves to ask why.', before: 'She thinks she asks too many questions.', after: 'Her questions solved the big mystery!', power: 'Wonder Glass' },
   { id: 'sora', name: 'Sora', world: 5, about: 'A little sky dragon.', before: 'She gives up when things are hard.', after: 'She learned to say "not yet" and kept practicing. Now she can fly!', power: 'Rainbow Wings' },
+  { id: 'shelly', name: 'Shelly', world: 6, about: 'A little sea turtle from Coral Cove.', before: 'She thinks she is too slow to help.', after: 'She learned that slow and careful is a super power!', power: 'Pearl Shell' },
 ];
 
-const HERO_TITLES = ['Star Seeker', 'Snow Scout', 'Word Wizard', 'Block Builder', 'Number Ninja', 'Song Star', 'Idea Maker', 'Science Scout', 'Wonder Kid', 'Shard Finder', 'Rainbow Hero', 'Star Guardian', 'Cloud Climber', 'Sky Legend'];
+const HERO_TITLES = ['Star Seeker', 'Snow Scout', 'Word Wizard', 'Block Builder', 'Number Ninja', 'Song Star', 'Idea Maker', 'Science Scout', 'Wonder Kid', 'Shard Finder', 'Rainbow Hero', 'Star Guardian', 'Cloud Climber', 'Sky Legend', 'Wave Rider', 'Ocean Hero'];
 
+/* the shop shows one section for each slot, in this order */
+const SHOP_SECTIONS = [['head', '👑 Hats and hair'], ['clip', '🎀 Hair clips'], ['face', '👓 Glasses'], ['cheek', '😊 Face paint'], ['ears', '💎 Earrings'], ['neck', '📿 Necklaces'], ['wrist', '✨ Bracelets'], ['bag', '👜 Bags'], ['hand', '🪄 In your hand'], ['back', '🧚 On your back']];
 const SHOP = [
   { id: 'flower', name: 'Flower', slot: 'head', cost: 15 },
   { id: 'bow', name: 'Pink Bow', slot: 'head', cost: 20 },
@@ -395,6 +455,14 @@ const SHOP = [
   { id: 'lightstick', name: 'Heart Stick', slot: 'hand', cost: 45 },
   { id: 'cape', name: 'Hero Cape', slot: 'back', cost: 60 },
   { id: 'wings', name: 'Fairy Wings', slot: 'back', cost: 100 },
+  { id: 'round', name: 'Round Glasses', slot: 'face', cost: 30 },
+  { id: 'hearts', name: 'Heart Glasses', slot: 'face', cost: 40 },
+  { id: 'shades', name: 'Cool Shades', slot: 'face', cost: 45 },
+  { id: 'stars', name: 'Star Glasses', slot: 'face', cost: 50 },
+  { id: 'studs', name: 'Pearl Earrings', slot: 'ears', cost: 25 },
+  { id: 'cherries', name: 'Cherry Earrings', slot: 'ears', cost: 30 },
+  { id: 'hoops', name: 'Gold Hoops', slot: 'ears', cost: 35 },
+  { id: 'stardrop', name: 'Star Earrings', slot: 'ears', cost: 50 },
   { id: 'pearls', name: 'Pearl Necklace', slot: 'neck', cost: 30 },
   { id: 'beads', name: 'Rainbow Beads', slot: 'neck', cost: 35 },
   { id: 'locket', name: 'Heart Locket', slot: 'neck', cost: 50 },
@@ -403,4 +471,16 @@ const SHOP = [
   { id: 'bangles', name: 'Gold Bangles', slot: 'wrist', cost: 30 },
   { id: 'pearlband', name: 'Pearl Bracelet', slot: 'wrist', cost: 35 },
   { id: 'charm', name: 'Heart Charm', slot: 'wrist', cost: 45 },
+  { id: 'heartclips', name: 'Heart Clips', slot: 'clip', cost: 15 },
+  { id: 'starclips', name: 'Star Clips', slot: 'clip', cost: 20 },
+  { id: 'barrette', name: 'Rainbow Clip', slot: 'clip', cost: 25 },
+  { id: 'butterfly', name: 'Butterfly Clip', slot: 'clip', cost: 30 },
+  { id: 'freckles', name: 'Freckles', slot: 'cheek', cost: 10 },
+  { id: 'heartpaint', name: 'Heart Paint', slot: 'cheek', cost: 15 },
+  { id: 'starsticker', name: 'Star Sticker', slot: 'cheek', cost: 20 },
+  { id: 'whiskers', name: 'Kitty Face', slot: 'cheek', cost: 25 },
+  { id: 'heartpurse', name: 'Heart Purse', slot: 'bag', cost: 35 },
+  { id: 'shellbag', name: 'Shell Bag', slot: 'bag', cost: 40 },
+  { id: 'bunnybag', name: 'Bunny Bag', slot: 'bag', cost: 45 },
+  { id: 'starbag', name: 'Star Bag', slot: 'bag', cost: 50 },
 ];

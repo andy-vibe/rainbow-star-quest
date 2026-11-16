@@ -62,6 +62,8 @@ const CAST = {
   glow: { name: () => 'Glow', draw: () => Art.gloom({ mood: 1 }) },
   grumble: { name: () => 'King Grumble', draw: () => Art.gloom({ mood: worldDone(4) ? 1 : 0.1, king: true }) },
   stormy: { name: () => 'Stormy', draw: () => Art.gloom({ mood: worldDone(5) ? 1 : 0, storm: true }) },
+  shelly: { name: () => 'Shelly', draw: (m, st) => Art.shelly(st || friendStage('shelly'), m) },
+  spike: { name: () => 'Spike', draw: () => Art.gloom({ mood: worldDone(6) ? 1 : 0, puffer: true }) },
   narr: { name: () => '', draw: () => Art.narr() },
 };
 const draw = (who, mood = 'happy') => CAST[who].draw(mood);
@@ -97,21 +99,23 @@ const LOOKS = {
   style: ['long', 'bob', 'buns', 'twin', 'pony'],
   dress: ['#ff7eb6', '#8e6bff', '#4aa8ff', '#3ecf8e', '#ffb347', '#ef5350'],
   shoes: ['#7a4b8c', '#ff4d9d', '#ef5350', '#ffb347', '#ffd54a', '#3ecf8e', '#4aa8ff', '#ffffff', '#2b2b3a'],
+  shoeStyle: ['flats', 'sneakers', 'boots', 'ballet', 'sparkle'],
+  pattern: ['plain', 'dots', 'stars', 'stripes', 'hearts'],
 };
 function lookPickers(hero, redraw) {
   const rowOf = (title, key, isColor) => {
     const chips = h('div', { class: 'chips' });
     LOOKS[key].forEach(v => {
-      const b = h('button', isColor ? { class: 'dot' + ((hero[key] || LOOKS[key][0]) === v ? ' sel' : ''), style: { background: v } } : { class: 'chip' + (hero[key] === v ? ' sel' : ''), text: cap(v) });
+      const b = h('button', isColor ? { class: 'dot' + ((hero[key] || LOOKS[key][0]) === v ? ' sel' : ''), style: { background: v } } : { class: 'chip' + ((hero[key] || LOOKS[key][0]) === v ? ' sel' : ''), text: cap(v) });
       b.onclick = () => { hero[key] = v; [...chips.children].forEach(x => x.classList.remove('sel')); b.classList.add('sel'); Snd.pop(); redraw(); };
       chips.append(b);
     });
     return h('div', { class: 'pickrow' }, h('h4', { text: title }), chips);
   };
-  return [rowOf('Hair style', 'style'), rowOf('Hair color', 'hair', true), rowOf('Dress color', 'dress', true), rowOf('Shoe color', 'shoes', true), rowOf('Skin', 'skin', true)];
+  return [rowOf('Hair style', 'style'), rowOf('Hair color', 'hair', true), rowOf('Dress color', 'dress', true), rowOf('Dress pattern', 'pattern'), rowOf('Shoes', 'shoeStyle'), rowOf('Shoe color', 'shoes', true), rowOf('Skin', 'skin', true)];
 }
 function heroMaker(first) {
-  const hero = S().hero ? Object.assign({}, S().hero) : { name: '', skin: LOOKS.skin[0], hair: LOOKS.hair[1], style: 'long', dress: LOOKS.dress[0], trim: '#ffffff', shoes: LOOKS.shoes[0], head: null, back: null, hand: null, neck: null, wrist: null };
+  const hero = S().hero ? Object.assign({}, S().hero) : { name: '', skin: LOOKS.skin[0], hair: LOOKS.hair[1], style: 'long', dress: LOOKS.dress[0], trim: '#ffffff', shoes: LOOKS.shoes[0], shoeStyle: 'flats', pattern: 'plain', head: null, back: null, hand: null, neck: null, wrist: null };
   const prev = h('div', { class: 'heroprev' });
   const redraw = () => { prev.innerHTML = Art.chibi(hero); };
   const nameIn = h('input', { class: 'nameinput', maxlength: 12, placeholder: 'Your name', value: hero.name });
@@ -148,7 +152,7 @@ function mapScreen() {
       h('div', { class: 'whost', html: open ? draw(Wd.host) : '' }),
       h('b', { text: Wd.name }),
       h('small', { text: open ? `⭐ ${worldStars(w)} / ${Wd.levels.length * 3}` : 'Locked' }),
-      worldDone(w) ? h('div', { class: 'shard' + (w < SHARD_WORLDS ? '' : ' wide'), html: w < SHARD_WORLDS ? Art.shard(w) : Art.rainbow() }) : null);
+      !worldDone(w) ? null : Wd.badge ? h('div', { class: 'badge', text: Wd.badge }) : h('div', { class: 'shard' + (w < SHARD_WORLDS ? '' : ' wide'), html: w < SHARD_WORLDS ? Art.shard(w) : Art.rainbow() }));
   });
   App.screen('map bg-map',
     floaters(['⭐', '✨', '☁️']),
@@ -209,7 +213,7 @@ function startLevel(w, l) {
 
 /* =============== PLAY A LEVEL =============== */
 const PRAISE = ['Great job!', 'Super!', 'You did it!', 'Amazing!', 'Wow!', 'So smart!', 'Yes!', 'Brilliant!'];
-const SHOTS = { hero: '⭐', lumi: '❄️', pix: '🧱', nova: '🎵', mochi: '🐾', sora: '🌈' };
+const SHOTS = { hero: '⭐', lumi: '❄️', pix: '🧱', nova: '🎵', mochi: '🐾', sora: '🌈', shelly: '🐚' };
 /* throw an emoji from one thing on screen to another, then call after() */
 function shoot(fromEl, toEl, emoji, after) {
   const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
@@ -382,10 +386,10 @@ function endingScreen() {
 const ITEM_ICON = { flower: '🌸', bow: '🎀', catears: '🐱', headphones: '🎧', helmet: '⛑️', tiara: '❄️', crown: '👑', wand: '⭐', mic: '🎤', lightstick: '💖', cape: '🦸', wings: '🧚' };
 function wardrobe() {
   const hero = S().hero;
-  const prev = h('div', { class: 'heroprev' }), gemsEl = h('span'), shop = h('div', { class: 'shop' });
+  const prev = h('div', { class: 'heroprev' }), gemsEl = h('span'), shop = h('div', { class: 'shopwrap' });
   const redraw = () => {
     prev.innerHTML = Art.chibi(hero); gemsEl.textContent = '💎 ' + S().gems; App.save();
-    shop.replaceChildren(...SHOP.map(it => {
+    shop.replaceChildren(...SHOP_SECTIONS.map(([slot, title]) => [h('h5', { class: 'shophead', text: title }), h('div', { class: 'shop' }, SHOP.filter(it => it.slot === slot).map(it => {
       const own = S().owned.includes(it.id), on = hero[it.slot] === it.id;
       const b = h('button', { class: 'shopitem' + (on ? ' on' : '') + (own ? ' own' : '') },
         h('div', { class: 'em', html: ITEM_ICON[it.id] || Art.accIcon(it.slot, it.id) }), h('b', { text: it.name }),
@@ -398,7 +402,7 @@ function wardrobe() {
         redraw();
       };
       return b;
-    }));
+    }))]).flat());
   };
   redraw();
   App.screen('maker bg-map',
@@ -471,7 +475,7 @@ function parentScreen() {
       h('h4', { text: 'Settings' }),
       h('div', { class: 'chips' }, toggle('Sound', 'sfx', () => { Snd.on = st.sfx; }), toggle('Voice (reads text aloud)', 'voice', () => { Voice.on = st.voice; }), toggle('Unlock all levels', 'unlockAll')),
       h('h4', { text: 'Difficulty' }), diff,
-      h('p', { class: 'dim', text: 'Each world is one step harder: math goes from numbers up to 10 (world 1) to adding and taking away up to 100 (world 5), then groups, doubles and halves (world 6). "Easier" and "Harder" move every world by one step.' }),
+      h('p', { class: 'dim', text: 'Each world is one step harder: math goes from numbers up to 10 (world 1) to adding and taking away up to 100 (world 5), then groups, doubles and halves (world 6), then times tables and sharing (world 7). "Easier" and "Harder" move every world by one step.' }),
       h('h4', { text: 'Progress' }),
       h('table', { class: 'stats' }, h('tr', {}, h('th', { text: 'Subject' }), h('th', { text: 'Questions done' }), h('th', { text: 'Right on first try' })), rows),
       h('p', { class: 'dim', text: `Stars: ${totalStars()} of ${WORLDS.length * 18}. Hero level: ${heroLevel()}.` }),

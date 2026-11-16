@@ -1,5 +1,5 @@
 /* Creative tools: there are no wrong answers here.
-   builder (blocks), pet (invent an animal), song, scene (stickers), story, paint (color book). */
+   builder (blocks), pet (invent an animal), song, scene (stickers), story, paint (color book), aquarium (fish tank). */
 'use strict';
 
 const Creative = {
@@ -10,6 +10,7 @@ const Creative = {
     scene: { name: 'Sticker Picture', icon: '🖼️', prompt: 'Make a picture with stickers!' },
     story: { name: 'Story Maker', icon: '📚', prompt: 'Make your own story!' },
     paint: { name: 'Color Book', icon: '🖍️', prompt: 'Color a picture any way you like!' },
+    aquarium: { name: 'Fish Tank', icon: '🐠', prompt: 'Fill a fish tank with sea friends!' },
   },
 
   /* opts: prompt, onDone(), onBack() */
@@ -306,6 +307,52 @@ const Creative = {
     COLORS.forEach((col, v) => { const b = h('button', { class: 'swatch' + (v === cur ? ' sel' : ''), style: { background: col } }); b.onclick = () => { cur = v; [...pal.children].forEach(c => c.classList.remove('sel')); b.classList.add('sel'); }; pal.append(b); });
     pal.append(h('button', { class: 'swatch eraser', text: '🗑️', onclick: () => { d.fills[d.pic] = {}; draw(); } }));
     body.append(pics, holder, pal, h('div', { class: 'ctip', text: 'Pick a color. Then tap a part of the picture. Color 4 parts or more.' }));
+    draw();
+  },
+
+  /* ---------- 7. Fish tank: sea friends swim back and forth ---------- */
+  aquarium(body, api) {
+    const SWIMMERS = '🐟 🐠 🐡 🐙 🦀 🐢 🐳 🐬 🦈 🦑 🦞 🦐 🐋 🦭'.split(' ');
+    const DECOR = '🌿 🌱 🐚 🪨 🏰 ⚓ 💎 ⭐'.split(' ');
+    const MAX = 16;
+    const d = api.data || { fish: [], decor: [] };
+    const tank = h('div', { class: 'tank' });
+    const sync = () => { api.save(d); api.ready(d.fish.length >= 3); };
+    const bubble = (x, y) => {
+      const b = h('i', { class: 'tbubble', style: { left: x + '%', top: y + '%' } });
+      tank.append(b); setTimeout(() => b.remove(), 2200);
+    };
+    function draw() {
+      tank.replaceChildren(
+        ...d.decor.map(it => h('span', { class: 'tdecor', text: it.e, style: { left: it.x + '%' } })),
+        ...d.fish.map(f => {
+          const el = h('span', { class: 'swimmer', style: { top: f.y + '%', animationDuration: f.s + 's', animationDelay: -f.t + 's' } }, h('span', { text: f.e }));
+          el.onclick = () => {           // a tapped fish does a flip and blows bubbles
+            anim(el.firstChild, [{ rotate: '0deg', scale: '1' }, { rotate: '360deg', scale: '1.4' }, { rotate: '360deg', scale: '1' }], { duration: 600 });
+            const r = el.getBoundingClientRect(), t = tank.getBoundingClientRect();
+            for (let k = 0; k < 3; k++) setTimeout(() => bubble((r.left - t.left + r.width / 2) / t.width * 100, (r.top - t.top) / t.height * 100), k * 150);
+            Snd.pop();
+          };
+          return el;
+        }));
+      sync();
+    }
+    const pal = h('div', { class: 'stickers' });
+    SWIMMERS.forEach(e => pal.append(h('button', { text: e, onclick: () => {
+      if (d.fish.length >= MAX) return toast('The tank is full! Tap 🗑️ to start again.');
+      d.fish.push({ e, y: rand(8, 62), s: rand(7, 15), t: rand(0, 14) }); Snd.pop(); draw();
+    } })));
+    const deco = h('div', { class: 'stickers' });
+    DECOR.forEach(e => deco.append(h('button', { text: e, onclick: () => {
+      if (d.decor.length >= 10) d.decor.shift();
+      d.decor.push({ e, x: rand(3, 90) }); Snd.tap(); draw();
+    } })));
+    body.append(tank,
+      h('div', { class: 'chips' },
+        h('button', { class: 'chip', text: '💧 Bubbles', onclick: () => { for (let k = 0; k < 10; k++) setTimeout(() => bubble(rand(5, 95), 85), k * 90); Snd.sparkle(); } }),
+        h('button', { class: 'chip', text: '🗑️ Empty the tank', onclick: () => { d.fish = []; d.decor = []; draw(); } })),
+      h('div', { class: 'ctip', text: 'Tap a sea friend to put it in the tank. Add 3 or more. Tap a fish in the tank to make it flip!' }),
+      pal, deco);
     draw();
   },
 };

@@ -32,14 +32,80 @@ Art.wristAcc = {
   pearlband: [-8.4, -2.8, 2.8, 8.4].map(x => `<circle cx="${x}" cy="0" r="3.4" fill="#fff6e6" stroke="rgba(0,0,0,.25)" stroke-width="1"/><circle cx="${x - 1}" cy="-1.1" r="1" fill="#fff"/>`).join(''),
   charm: `<rect x="-11" y="-2.2" width="22" height="4.4" rx="2.2" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2"/><path d="${HEART}" transform="translate(0,7.5) scale(.75)" fill="#ff5fa2" stroke="#e0407f" stroke-width="1.2"/>`,
 };
-/* a small picture of a necklace or bracelet, for the shop */
-Art.accIcon = (slot, id) => slot === 'neck'
-  ? `<svg viewBox="70 144 60 34" xmlns="http://www.w3.org/2000/svg">${Art.neckAcc[id] || ''}</svg>`
-  : `<svg viewBox="-15 -10 30 24" xmlns="http://www.w3.org/2000/svg">${Art.wristAcc[id] || ''}</svg>`;
+/* Earrings are drawn hanging down from (0,0), then put on both sides of the head. */
+Art.earAcc = {
+  studs: `<circle cx="0" cy="2" r="4.4" fill="#fff6e6" stroke="rgba(0,0,0,.25)" stroke-width="1"/><circle cx="-1.2" cy="0.8" r="1.3" fill="#fff"/>`,
+  cherries: `<path d="M0,0 Q-1,6 -4,10 M0,0 Q2,6 4,11" stroke="#3a9a4a" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M0,0 Q5,-3 7,1 Q3,3 0,0Z" fill="#3ecf8e"/><circle cx="-4" cy="12.5" r="4" fill="#ef3b4f"/><circle cx="4" cy="13.5" r="4" fill="#ef3b4f"/><circle cx="-5.3" cy="11.2" r="1.2" fill="#fff" opacity=".8"/><circle cx="2.7" cy="12.2" r="1.2" fill="#fff" opacity=".8"/>`,
+  hoops: `<circle cx="0" cy="8" r="7.5" fill="none" stroke="#e0a800" stroke-width="3.4"/><circle cx="0" cy="8" r="7.5" fill="none" stroke="#ffd54a" stroke-width="1.8"/>`,
+  stardrop: `<line x1="0" y1="0" x2="0" y2="6" stroke="#e0a800" stroke-width="1.6"/><path d="${starPath(0, 11.5, 6.5, 2.8)}" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2" stroke-linejoin="round"/>`,
+};
+/* Glasses sit over the eyes, which are at (78,104) and (122,104). */
+const glassArms = c => `<path d="M63,100 L45,95 M137,100 L155,95" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
+Art.faceAcc = {
+  round: glassArms('#6c5ce7') + `<circle cx="78" cy="104" r="15" fill="#fff" fill-opacity=".2" stroke="#6c5ce7" stroke-width="3"/><circle cx="122" cy="104" r="15" fill="#fff" fill-opacity=".2" stroke="#6c5ce7" stroke-width="3"/><path d="M93,102 Q100,96 107,102" stroke="#6c5ce7" stroke-width="3" fill="none"/>`,
+  hearts: glassArms('#e0407f') + [78, 122].map(x => `<path d="${HEART}" transform="translate(${x},107) scale(2)" fill="#ff5fa2" fill-opacity=".75" stroke="#e0407f" stroke-width="1.2"/>`).join('') + `<path d="M95,100 Q100,96 105,100" stroke="#e0407f" stroke-width="3" fill="none"/>`,
+  stars: glassArms('#e0a800') + [78, 122].map(x => `<path d="${starPath(x, 105, 20, 10.5)}" fill="#fff6b0" fill-opacity=".35" stroke="#ffb300" stroke-width="3" stroke-linejoin="round"/>`).join(''),
+  shades: glassArms('#2b2b3a') + `<rect x="60" y="92" width="36" height="24" rx="10" fill="#2b2b3a"/><rect x="104" y="92" width="36" height="24" rx="10" fill="#2b2b3a"/><path d="M96,100 L104,100" stroke="#2b2b3a" stroke-width="4"/><path d="M66,98 L74,98 M110,98 L118,98" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".6"/>`,
+};
+/* Hair clips are drawn around (0,0), then pinned in the hair over the left eye. */
+Art.clipAcc = {
+  starclips: [-7, 7].map(x => `<path d="${starPath(x, 0, 6.5, 2.8)}" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2" stroke-linejoin="round"/>`).join(''),
+  heartclips: [-7, 7].map(x => `<path d="${HEART}" transform="translate(${x},1) scale(.75)" fill="#ff5fa2" stroke="#e0407f" stroke-width="1.4"/>`).join(''),
+  butterfly: `<ellipse cx="-6" cy="-3" rx="6.5" ry="5" fill="#8fd3ff" stroke="#4aa8ff" stroke-width="1.2" transform="rotate(-20 -6 -3)"/><ellipse cx="6" cy="-3" rx="6.5" ry="5" fill="#8fd3ff" stroke="#4aa8ff" stroke-width="1.2" transform="rotate(20 6 -3)"/><ellipse cx="-4.5" cy="4" rx="4" ry="3.2" fill="#ff9fc8" stroke="#e57aa8" stroke-width="1.2"/><ellipse cx="4.5" cy="4" rx="4" ry="3.2" fill="#ff9fc8" stroke="#e57aa8" stroke-width="1.2"/><rect x="-1.3" y="-7" width="2.6" height="13" rx="1.3" fill="#3b2a4a"/>`,
+  barrette: ['#ff5f6d', '#ffd54a', '#5fd38d', '#4aa8ff', '#8e6bff'].map((c, k) => `<rect x="${-12.5 + k * 5}" y="-3.5" width="5" height="7" fill="${c}"/>`).join('') + `<rect x="-12.5" y="-3.5" width="25" height="7" rx="2.5" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="1"/>`,
+};
+/* Face paint and stickers on the cheeks (the blush is at (60,119) and (140,119)). */
+Art.cheekAcc = {
+  freckles: [60, 140].map(cx => [[-6, -3], [0, 0], [6, -3], [-3, 4], [4, 4]].map(([x, y]) => `<circle cx="${cx + x}" cy="${116 + y}" r="1.5" fill="#b8754a" opacity=".75"/>`).join('')).join(''),
+  heartpaint: `<path d="${HEART}" transform="translate(58,121) scale(.95)" fill="#ff5fa2" opacity=".9"/>`,
+  starsticker: `<path d="${starPath(142, 121, 8, 3.5)}" fill="#ffd54a" stroke="#e0a800" stroke-width="1.2" stroke-linejoin="round"/><circle cx="140" cy="118" r="1.3" fill="#fff"/>`,
+  whiskers: `<path d="M50,114 L30,108 M50,119 L28,119 M50,124 L30,130 M150,114 L170,108 M150,119 L172,119 M150,124 L170,130" stroke="#3b2a4a" stroke-width="2.2" stroke-linecap="round"/><path d="M95,114 L105,114 L100,119 Z" fill="#ff7eb6"/>`,
+};
+/* Bags hang from a strap over the right shoulder, at the left hip. */
+const strap = c => `<path d="M120,152 L66,206" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
+Art.bagAcc = {
+  heartpurse: strap('#e0407f') + `<path d="${HEART}" transform="translate(62,218) scale(1.9)" fill="#ff7eb6" stroke="#e0407f" stroke-width=".9"/><circle cx="62" cy="211" r="2.6" fill="#ffd54a" stroke="#e0a800" stroke-width="1"/>`,
+  shellbag: strap('#c98a5a') + `<path d="M48,224 Q46,200 62,198 Q78,200 76,224 Q62,229 48,224Z" fill="#ffc6d9" stroke="#e57aa8" stroke-width="1.6" stroke-linejoin="round"/><path d="M62,200 L62,226 M55,201 L52,224 M69,201 L72,224" stroke="#e57aa8" stroke-width="1.3"/><circle cx="62" cy="214" r="2.6" fill="#fff6e6" stroke="rgba(0,0,0,.2)" stroke-width="1"/>`,
+  bunnybag: strap('#c9b6f5') + `<ellipse cx="55" cy="198" rx="3.6" ry="9" fill="#fff" stroke="#c9b6f5" stroke-width="1.6"/><ellipse cx="69" cy="198" rx="3.6" ry="9" fill="#fff" stroke="#c9b6f5" stroke-width="1.6"/><circle cx="62" cy="215" r="13" fill="#fff" stroke="#c9b6f5" stroke-width="1.8"/><circle cx="57.5" cy="213" r="1.7" fill="#3b2a4a"/><circle cx="66.5" cy="213" r="1.7" fill="#3b2a4a"/><path d="M60,218 Q62,220 64,218" stroke="#ff7eb6" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse cx="54" cy="218" rx="2.6" ry="1.6" fill="#ffb3c7"/><ellipse cx="70" cy="218" rx="2.6" ry="1.6" fill="#ffb3c7"/>`,
+  starbag: strap('#e0a800') + `<path d="${starPath(62, 215, 15, 7)}" fill="#ffd54a" stroke="#e0a800" stroke-width="1.8" stroke-linejoin="round"/><circle cx="58" cy="213" r="1.6" fill="#3b2a4a"/><circle cx="66" cy="213" r="1.6" fill="#3b2a4a"/><path d="M59,218 Q62,221 65,218" stroke="#3b2a4a" stroke-width="1.4" fill="none" stroke-linecap="round"/>`,
+};
+
+/* Shoe styles. x = middle of the shoe, lx = middle of the leg. */
+const SHOE = {
+  flats: (c, x) => '',
+  sneakers: (c, x) => `<rect x="${x - 14}" y="252" width="28" height="5" rx="2.5" fill="#fff" stroke="rgba(0,0,0,.18)" stroke-width="1"/><path d="M${x - 4},246 h8 M${x - 4},249.5 h8" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>`,
+  boots: (c, x, lx) => `<rect x="${lx - 9}" y="228" width="18" height="24" rx="4" fill="${c}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/><rect x="${lx - 10}" y="227" width="20" height="6" rx="3" fill="#fff" opacity=".75"/>`,
+  ballet: (c, x, lx) => `<path d="M${lx - 6},248 L${lx + 6},236 M${lx + 6},248 L${lx - 6},236" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/><circle cx="${x}" cy="246" r="2.6" fill="#fff" opacity=".9"/>`,
+  sparkle: (c, x) => [[-7, -1, '#fff'], [0, 2, '#ffd54a'], [7, -1, '#fff'], [-3, -4, '#ffd54a'], [4, 4, '#fff']].map(([dx, dy, f]) => `<circle cx="${x + dx}" cy="${251 + dy}" r="1.5" fill="${f}"/>`).join('') + `<path d="${starPath(x + 9, 245, 4, 1.6)}" fill="#fff"/>`,
+};
+/* Dress patterns: drawn in white on top of any dress color */
+let patN = 0;
+const PATTERN = {
+  dots: ['14', `<circle cx="4" cy="4" r="2.6"/><circle cx="11" cy="11" r="2.6"/>`],
+  stars: ['22', `<path d="${starPath(6, 6, 4.5, 2)}"/><path d="${starPath(17, 17, 4.5, 2)}"/>`],
+  stripes: ['10', `<rect x="0" y="0" width="10" height="4"/>`],
+  hearts: ['20', `<path d="${HEART}" transform="translate(5,6) scale(.55)"/><path d="${HEART}" transform="translate(15,16) scale(.55)"/>`],
+};
+
+/* a small picture of an accessory, for the shop */
+Art.accIcon = (slot, id) => {
+  const svg = (vb, inner) => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner || ''}</svg>`;
+  if (slot === 'neck') return svg('70 144 60 34', Art.neckAcc[id]);
+  if (slot === 'wrist') return svg('-15 -10 30 24', Art.wristAcc[id]);
+  if (slot === 'ears') return svg('-17 -4 34 24', `<g transform="translate(-8,0)">${Art.earAcc[id]}</g><g transform="translate(8,0)">${Art.earAcc[id]}</g>`);
+  if (slot === 'face') return svg('42 84 116 40', Art.faceAcc[id]);
+  if (slot === 'clip') return svg('-16 -10 32 20', Art.clipAcc[id]);
+  if (slot === 'cheek') {           // zoom in on the cheek where it is, on a bit of skin
+    const [x, y, w, hh] = { freckles: [42, 106, 36, 22], heartpaint: [42, 108, 32, 24], starsticker: [126, 108, 32, 24], whiskers: [26, 102, 82, 34] }[id] || [26, 100, 148, 34];
+    return svg(`${x} ${y} ${w} ${hh}`, `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="${hh / 2}" fill="#ffe0c8"/>${Art.cheekAcc[id]}`);
+  }
+  if (slot === 'bag') return svg('40 194 44 36', Art.bagAcc[id]);
+  return '';
+};
 
 /* A cute girl character. Options change hair, dress, shoes and extras. */
 Art.chibi = function (o) {
-  o = Object.assign({ skin: '#ffe0c8', hair: '#5b3a29', style: 'long', dress: '#ff7eb6', trim: '#ffffff', shoes: '#7a4b8c', head: null, back: null, hand: null, neck: null, wrist: null, mood: 'happy', extra: '' }, o);
+  o = Object.assign({ skin: '#ffe0c8', hair: '#5b3a29', style: 'long', dress: '#ff7eb6', trim: '#ffffff', shoes: '#7a4b8c', shoeStyle: 'flats', pattern: 'plain', head: null, back: null, hand: null, neck: null, wrist: null, ears: null, face: null, clip: null, cheek: null, bag: null, mood: 'happy', extra: '' }, o);
   const H = o.hair, K = o.skin;
   const base = `<path d="M38,98 Q34,28 100,26 Q166,28 162,98 Q160,126 150,136 L50,136 Q40,126 38,98Z" fill="${H}"/>`;
   const backHair = {
@@ -82,28 +148,38 @@ Art.chibi = function (o) {
   }[o.hand] || '';
 
   const neckAcc = Art.neckAcc[o.neck] || '';
+  const e = Art.earAcc[o.ears];
+  const earAcc = e ? `<g transform="translate(45,113)">${e}</g><g transform="translate(155,113)">${e}</g>` : '';
+  const faceAcc = Art.faceAcc[o.face] || '';
+  const cl = Art.clipAcc[o.clip];
+  const clipAcc = cl ? `<g transform="translate(62,60) rotate(-35)">${cl}</g>` : '';
+  const cheekAcc = Art.cheekAcc[o.cheek] || '';
+  const bagAcc = Art.bagAcc[o.bag] || '';
+  const shoe = SHOE[o.shoeStyle] || SHOE.flats;
+  const DRESS = 'M74,148 Q100,138 126,148 L152,222 Q100,238 48,222 Z';
+  const P = PATTERN[o.pattern], pid = 'dp' + (++patN);
+  const pattern = P ? `<defs><pattern id="${pid}" width="${P[0]}" height="${P[0]}" patternUnits="userSpaceOnUse"><g fill="#fff">${P[1]}</g></pattern></defs><path d="${DRESS}" fill="url(#${pid})" opacity=".6"/>` : '';
   const w = Art.wristAcc[o.wrist];
   const wristAcc = w ? `<g transform="translate(56,183) rotate(38)">${w}</g><g transform="translate(144,183) rotate(-38)">${w}</g>` : '';
 
   return svgWrap(`
     ${backAcc}${backHair}
     <rect x="80" y="224" width="14" height="24" rx="6" fill="${K}"/><rect x="106" y="224" width="14" height="24" rx="6" fill="${K}"/>
-    <ellipse cx="85" cy="251" rx="14" ry="7.5" fill="${o.shoes}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/><ellipse cx="115" cy="251" rx="14" ry="7.5" fill="${o.shoes}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>
-    <ellipse cx="80" cy="248" rx="4.5" ry="2" fill="#fff" opacity=".45"/><ellipse cx="110" cy="248" rx="4.5" ry="2" fill="#fff" opacity=".45"/>
+    ${[[85, 87], [115, 113]].map(([x, lx]) => `<ellipse cx="${x}" cy="251" rx="14" ry="7.5" fill="${o.shoes}" stroke="rgba(0,0,0,.18)" stroke-width="1.5"/>${shoe(o.shoes, x, lx)}<ellipse cx="${x - 5}" cy="248" rx="4.5" ry="2" fill="#fff" opacity=".45"/>`).join('')}
     <path d="M76,156 L50,190" stroke="${o.dress}" stroke-width="17" stroke-linecap="round"/><path d="M124,156 L150,190" stroke="${o.dress}" stroke-width="17" stroke-linecap="round"/>
     <circle cx="48" cy="194" r="9.5" fill="${K}"/><circle cx="152" cy="194" r="9.5" fill="${K}"/>
     ${wristAcc}
-    <path d="M74,148 Q100,138 126,148 L152,222 Q100,238 48,222 Z" fill="${o.dress}"/>
+    <path d="${DRESS}" fill="${o.dress}"/>${pattern}
     <path d="M48,222 Q100,238 152,222 L155,231 Q100,248 45,231 Z" fill="${o.trim}"/>
     <path d="M84,146 Q100,160 116,146" stroke="${o.trim}" stroke-width="6" fill="none" stroke-linecap="round"/>
-    ${neckAcc}
+    ${bagAcc}${neckAcc}
     <circle cx="100" cy="95" r="58" fill="${K}"/>
-    <ellipse cx="60" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/><ellipse cx="140" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/>
+    <ellipse cx="60" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/><ellipse cx="140" cy="119" rx="11" ry="6.5" fill="#ff9bb0" opacity=".55"/>${cheekAcc}
     ${eyesG(`<ellipse cx="78" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/><ellipse cx="122" cy="104" rx="8.5" ry="11.5" fill="#3b2a4a"/>
     <circle cx="81" cy="99" r="3.6" fill="#fff"/><circle cx="125" cy="99" r="3.6" fill="#fff"/>`)}
-    ${mouth}
+    ${mouth}${faceAcc}
     <path d="M42,97 Q36,34 100,30 Q164,34 158,97 Q150,66 126,60 Q116,80 98,62 Q72,62 42,97 Z" fill="${H}"/>
-    ${headAcc}${handAcc}${o.extra}
+    ${clipAcc}${earAcc}${headAcc}${handAcc}${o.extra}
   `);
 };
 
@@ -170,6 +246,29 @@ Art.mochi = function (stage = 1, mood = 'happy') {
   `);
 };
 
+/* Shelly: a little sea turtle who thinks she is too slow. When she grows, her shell turns to pearl. */
+Art.shelly = function (stage = 1, mood = 'happy') {
+  const K = '#9be3b0', KD = '#5fb985';
+  const [shell, rim, plate] = stage > 1 ? ['#f7d3ec', '#d99ac6', '#fff0fa'] : ['#6fbf73', '#4d9a56', '#8fd394'];
+  const mouth = mood === 'sad' ? `<path d="M90,134 Q100,126 110,134" stroke="#3f7a52" stroke-width="3" fill="none" stroke-linecap="round"/>`
+    : `<path d="M88,126 Q100,138 112,126" stroke="#3f7a52" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  const hex = [[100, 186], [70, 200], [130, 200], [84, 226], [116, 226]].map(([x, y]) => `<path d="M${x - 12},${y} L${x - 6},${y - 10} L${x + 6},${y - 10} L${x + 12},${y} L${x + 6},${y + 10} L${x - 6},${y + 10} Z" fill="${plate}" stroke="${rim}" stroke-width="2.5" stroke-linejoin="round"/>`).join('');
+  const pearl = stage > 1 ? `<path d="M80,52 Q100,30 120,52 Q100,46 80,52Z" fill="#ffc6d9" stroke="#e57aa8" stroke-width="2.5" stroke-linejoin="round"/><circle cx="100" cy="42" r="8" fill="#fff6e6" stroke="#d9c6b0" stroke-width="2"/><circle cx="97" cy="39" r="2.4" fill="#fff"/><text x="142" y="56" font-size="24">✨</text>` : '';
+  return svgWrap(`
+    <ellipse cx="46" cy="196" rx="26" ry="12" fill="${K}" stroke="${KD}" stroke-width="3" transform="rotate(-30 46 196)"/><ellipse cx="154" cy="196" rx="26" ry="12" fill="${K}" stroke="${KD}" stroke-width="3" transform="rotate(30 154 196)"/>
+    <ellipse cx="74" cy="246" rx="18" ry="10" fill="${K}" stroke="${KD}" stroke-width="3"/><ellipse cx="126" cy="246" rx="18" ry="10" fill="${K}" stroke="${KD}" stroke-width="3"/>
+    <ellipse cx="100" cy="206" rx="58" ry="46" fill="${shell}" stroke="${rim}" stroke-width="3.5"/>
+    ${hex}
+    ${stage > 1 ? '<ellipse cx="78" cy="184" rx="10" ry="5" fill="#fff" opacity=".7" transform="rotate(-25 78 184)"/>' : ''}
+    <ellipse cx="100" cy="102" rx="64" ry="56" fill="${K}" stroke="${KD}" stroke-width="3"/>
+    <ellipse cx="62" cy="64" rx="8" ry="5" fill="${KD}" opacity=".45"/><ellipse cx="136" cy="62" rx="6" ry="4" fill="${KD}" opacity=".45"/><ellipse cx="150" cy="80" rx="5" ry="3.5" fill="${KD}" opacity=".45"/>
+    <ellipse cx="56" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/><ellipse cx="144" cy="118" rx="11" ry="6.5" fill="#ff9bb0" opacity=".6"/>
+    ${eyesG(`<ellipse cx="74" cy="100" rx="9" ry="12" fill="#3b2a4a"/><ellipse cx="126" cy="100" rx="9" ry="12" fill="#3b2a4a"/>
+    <circle cx="77" cy="95" r="3.8" fill="#fff"/><circle cx="129" cy="95" r="3.8" fill="#fff"/>`)}
+    ${mouth}${pearl}
+  `);
+};
+
 /* Sora: a little sky dragon who is learning to fly */
 Art.sora = function (stage = 1, mood = 'happy') {
   const B = '#8fd3ff', D = '#4fa9e0';
@@ -213,12 +312,28 @@ Art.twinkle = (mood = 'happy') => svgWrap(`
 `);
 
 /* Gloom: a grumpy shadow puff. mood 0 = grumpy and grey, 1 = happy and bright.
-   king: wears a crown. storm: a storm cloud with lightning, that makes a rainbow when happy. */
+   king: wears a crown. storm: a storm cloud with lightning, that makes a rainbow when happy.
+   puffer: a round pufferfish with spikes that go down when it cheers up. */
+/* the pufferfish: tail, fins and spikes (long when grumpy, short when happy), then the round body */
+function pufferBody(m, body, dark) {
+  const L = 6 + (1 - m) * 16;
+  const spikes = [...Array(18)].map((_, k) => {
+    const a = k / 18 * Math.PI * 2, b = 0.12, R = 70;
+    const p = (ang, r) => `${(100 + r * Math.cos(ang)).toFixed(1)},${(140 + r * Math.sin(ang)).toFixed(1)}`;
+    return `M${p(a - b, R)} L${p(a, R + L)} L${p(a + b, R)}Z`;
+  }).join(' ');
+  const bubbles = m > 0.6 ? `<circle cx="34" cy="60" r="8" fill="none" stroke="#bfe9ff" stroke-width="3"/><circle cx="20" cy="36" r="5" fill="none" stroke="#bfe9ff" stroke-width="3"/>` : '';
+  return `${bubbles}<path d="M160,140 L198,108 Q190,140 198,172 Z" fill="${body}" stroke="${dark}" stroke-width="5" stroke-linejoin="round"/>
+    <path d="${spikes}" fill="${dark}" stroke="${dark}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="100" cy="140" r="72" fill="${body}" stroke="${dark}" stroke-width="5"/>
+    <ellipse cx="100" cy="186" rx="44" ry="20" fill="#fff" opacity=".35"/>
+    <path d="M40,150 Q22,140 30,124 Q44,132 48,146Z" fill="${dark}" opacity=".8"/>`;
+}
 Art.gloom = function (o) {
-  o = Object.assign({ mood: 0, king: false, storm: false }, o);
+  o = Object.assign({ mood: 0, king: false, storm: false, puffer: false }, o);
   const m = clamp(o.mood, 0, 1);
-  const body = o.storm ? lerpColor('#5a6688', '#eef6ff', m) : lerpColor('#5d4f73', '#ffc94d', m);
-  const dark = o.storm ? lerpColor('#3e4866', '#9cc6ec', m) : lerpColor('#463a59', '#f59e0b', m);
+  const body = o.storm ? lerpColor('#5a6688', '#eef6ff', m) : o.puffer ? lerpColor('#6b7f8c', '#ffd27a', m) : lerpColor('#5d4f73', '#ffc94d', m);
+  const dark = o.storm ? lerpColor('#3e4866', '#9cc6ec', m) : o.puffer ? lerpColor('#4b5c68', '#f0a93b', m) : lerpColor('#463a59', '#f59e0b', m);
   const my = 176 + (m - 0.5) * 30;            // mouth curve: frown -> smile
   const brow = (1 - m) * 12;
   const crown = o.king ? `<path d="M62,60 L68,22 L86,44 L100,14 L114,44 L132,22 L138,60 Z" fill="#ffd54a" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="46" r="6" fill="#b388ff"/>` : '';
@@ -226,13 +341,13 @@ Art.gloom = function (o) {
   const glow = m > 0.6 ? `<circle cx="100" cy="140" r="96" fill="#fff3a8" opacity=".5"/>` : '';
   const happyBow = o.storm && m > 0.6 ? ['#ff7eb6', '#ffd54a', '#5fd38d', '#4aa8ff'].map((c, k) => `<path d="M${30 + k * 9},72 A${70 - k * 9},${64 - k * 9} 0 0 1 ${170 - k * 9},72" stroke="${c}" stroke-width="9" fill="none"/>`).join('') : '';
   const puffs = o.storm ? `<circle cx="62" cy="80" r="30" fill="${body}" stroke="${dark}" stroke-width="5"/><circle cx="100" cy="60" r="36" fill="${body}" stroke="${dark}" stroke-width="5"/><circle cx="140" cy="80" r="30" fill="${body}" stroke="${dark}" stroke-width="5"/>` : '';
-  const antennas = o.storm ? '' : `<path d="M56,74 Q44,50 60,40 M144,74 Q156,50 140,40" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
+  const antennas = o.storm || o.puffer ? '' : `<path d="M56,74 Q44,50 60,40 M144,74 Q156,50 140,40" stroke="${dark}" stroke-width="6" fill="none" stroke-linecap="round"/>
     <circle cx="60" cy="38" r="6" fill="${m > 0.6 ? '#ff7eb6' : dark}"/><circle cx="140" cy="38" r="6" fill="${m > 0.6 ? '#7fd4f5' : dark}"/>`;
   const thunder = o.storm && m < 0.6 ? `<g opacity="${(1 - m).toFixed(2)}"><path d="M150,14 L178,14 L164,42 L184,42 L146,92 L156,56 L138,56 Z" fill="#ffd54a" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/>
     ${[56, 86, 116, 146].map((x, k) => `<path d="M${x},${240 + (k % 2) * 8} l-6,14" stroke="#7cc8f2" stroke-width="5" stroke-linecap="round"/>`).join('')}</g>` : '';
   return svgWrap(`
     ${glow}${happyBow}${puffs}
-    <path d="M32,160 Q22,60 100,52 Q178,60 168,160 Q174,214 146,204 Q132,232 114,208 Q100,236 86,208 Q68,232 54,204 Q26,214 32,160Z" fill="${body}" stroke="${dark}" stroke-width="5" stroke-linejoin="round"/>
+    ${o.puffer ? pufferBody(m, body, dark) : `<path d="M32,160 Q22,60 100,52 Q178,60 168,160 Q174,214 146,204 Q132,232 114,208 Q100,236 86,208 Q68,232 54,204 Q26,214 32,160Z" fill="${body}" stroke="${dark}" stroke-width="5" stroke-linejoin="round"/>`}
     ${antennas}
     ${eyesG(`<ellipse cx="76" cy="124" rx="16" ry="18" fill="#fff"/><ellipse cx="124" cy="124" rx="16" ry="18" fill="#fff"/>
     <circle cx="79" cy="128" r="8" fill="#2b2140"/><circle cx="121" cy="128" r="8" fill="#2b2140"/>
@@ -319,6 +434,18 @@ Art.scenery = function (id) {
     for (let i = 0; i < 6; i++) s += R(384 + i * 40, 178, 22, 14, '#130e2b');
     s += [[370, 190], [614, 190], [491, 150], [430, 250], [550, 250]].map(([x, y]) => R(x, y, 16, 24, '#ffd54a', 'rx="8"')).join('');
     s += `<path d="M476,360 v-50 a24,24 0 0 1 48,0 v50Z" fill="#0b0820"/><path d="M0,420 L0,372 Q500,345 1000,372 L1000,420Z" fill="#1a1338"/>`;
+  } else if (id === 'sea') {
+    s += `<defs><linearGradient id="searay" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".35" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>`;
+    for (const [x, w] of [[120, 70], [380, 90], [640, 60], [860, 80]]) s += `<path d="M${x},0 L${x + w},0 L${x + w * 2.2},420 L${x + w * 0.6},420Z" fill="url(#searay)"/>`;
+    for (const [x, y, r] of [[90, 120, 8], [110, 80, 5], [520, 60, 7], [540, 30, 4], [940, 140, 9], [960, 100, 5]]) s += `<circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#fff" stroke-width="3" opacity=".6"/>`;
+    s += `<path d="M0,420 L0,330 Q200,300 420,330 T1000,320 L1000,420Z" fill="#f1dc9c"/><path d="M0,420 L0,370 Q300,350 600,372 T1000,365 L1000,420Z" fill="#e8cd84"/>`;
+    const weed = (x, hh, c) => `<path d="M${x},${336} q-16,-${hh / 4} 0,-${hh / 2} t0,-${hh / 2}" stroke="${c}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
+    s += weed(60, 160, '#3fa34d') + weed(84, 110, '#5fc27a') + weed(470, 130, '#3fa34d') + weed(900, 180, '#3fa34d') + weed(930, 120, '#5fc27a');
+    const coral = (x, c) => `<path d="M${x},334 L${x},300 M${x},312 L${x - 18},288 M${x},306 L${x + 16},280 M${x - 18},288 L${x - 26},272 M${x + 16},280 L${x + 26},266" stroke="${c}" stroke-width="11" stroke-linecap="round" fill="none"/>`;
+    s += coral(200, '#ff7eb6') + coral(260, '#ff9f43') + coral(700, '#ff7eb6') + coral(770, '#b388ff');
+    s += `<ellipse cx="560" cy="336" rx="56" ry="26" fill="#8a94a6"/><ellipse cx="610" cy="342" rx="34" ry="18" fill="#a3adbd"/>`;
+    s += `<path d="M352,350 Q350,330 364,328 Q378,330 376,350Z" fill="#ffc6d9"/><path d="M820,352 Q818,334 830,332 Q842,334 840,352Z" fill="#fff3e0"/><circle cx="420" cy="352" r="6" fill="#fff6e6"/>`;
+    s += `<path d="M300,180 q20,-14 40,0 q-20,14 -40,0Z M340,180 l12,-9 v18Z" fill="#ffb347"/><path d="M700,140 q16,-11 32,0 q-16,11 -32,0Z M732,140 l10,-7 v14Z" fill="#ffd54a"/>`;
   } else if (id === 'sky') {
     ['#ff8fa3', '#ffc078', '#ffe58a', '#a6e3a1', '#8fd3ff', '#c3a6ff'].forEach((c, k) => { const r = 330 - k * 16; s += `<path d="M${180 - r},420 A${r},${r} 0 0 1 ${180 + r},420" stroke="${c}" stroke-width="16" fill="none" opacity=".7"/>`; });
     for (const [x, y, k] of [[300, 70, 1], [560, 46, 0.7], [930, 60, 0.9]]) s += `<ellipse cx="${x}" cy="${y}" rx="${70 * k}" ry="${22 * k}" fill="#fff" opacity=".85"/><ellipse cx="${x - 16 * k}" cy="${y - 14 * k}" rx="${34 * k}" ry="${22 * k}" fill="#fff" opacity=".85"/>`;

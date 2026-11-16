@@ -125,6 +125,7 @@
     snowburst: 'battle/get-buff', notes: 'activity/prepare', notesdrop: 'battle/get-debuff', questions: 'action/idle/random-02',
     towerup: 'action/idle/random-03', powerup: 'battle/get-buff', starjoin: 'activity/evolve', glows: 'activity/prepare', party: 'activity/evolve',
     thunder: 'defense/hit-by-normal-crit', flapfail: 'battle/get-debuff', fly: 'activity/prepare', rainbow: 'battle/get-buff', calm: 'battle/get-buff',
+    bubbles: 'activity/prepare', slowswim: 'action/idle/random-02', puffup: 'defense/hit-by-normal-crit', unpuff: 'battle/get-buff',
   };
   App.on('scene', ({ id, c }) => { if (id !== 'intro') joinScene(c); });        // in the intro it arrives with the hero
   App.on('line', ({ who, c }) => { if (who === 'hero') joinScene(c); });
@@ -141,20 +142,20 @@
   /* ---------- Chimeras are the enemies ----------
      The game draws every Gloom with Art.gloom(). Here that function is swapped for one
      that returns an animated Chimera instead. Each world has its own Chimera. */
-  const ENEMY = ['wolf-gray', 'treant', 'wolf-aquatic', 'treant-flowering'], KING = 'bear-mom', MINI = 'slime';
+  const ENEMY = ['wolf-gray', 'treant', 'wolf-aquatic', 'treant-flowering', null, null, 'wolf-aquatic'], KING = 'bear-mom', MINI = 'slime';   // Coral Cove: the sea wolf
   const HAPPY = 'battle/get-buff', HIT = 'defense/hit-by-normal', ATTACK = 'attack/melee/normal-attack';
   let world = -1, lastRight = 0;
   const svgGloom = Art.gloom;
   Art.gloom = function (o) {
     o = o || {};
-    const name = o.king ? KING : (world >= 0 && world < 4 ? ENEMY[world] : MINI);
+    const name = o.king ? KING : (ENEMY[world] || MINI);
     const happy = (o.mood || 0) >= 0.6, justHit = Date.now() - lastRight < 1200;
     return `<canvas class="char" data-spine="${name}" data-zoom="1.25" data-anim="${justHit ? HIT : happy ? HAPPY : ''}" data-loop="${!justHit && happy ? 1 : 0}" data-idle="${happy ? HAPPY : ''}" data-mood="${o.mood || 0}" data-king="${o.king ? 1 : 0}"></canvas>`;
   };
   /* the Chimera files could not be loaded (offline before they were saved): draw the old Gloom so the enemy is not missing */
   document.addEventListener('spinefail', e => {
     const cv = e.target;
-    if (cv.dataset.mood != null && cv.parentNode) cv.outerHTML = svgGloom({ mood: +cv.dataset.mood, king: cv.dataset.king === '1' });
+    if (cv.dataset.mood != null && cv.parentNode) cv.outerHTML = svgGloom(Object.assign({ mood: +cv.dataset.mood, king: cv.dataset.king === '1' }, WORLDS[world] && WORLDS[world].gloom));
   });
   App.on('scene', ({ id }) => { world = WORLDS.findIndex(w => id.startsWith(w.id)); });
   App.on('level', ({ w, boss }) => {

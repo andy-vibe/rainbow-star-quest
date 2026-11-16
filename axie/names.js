@@ -14,6 +14,7 @@
     'See? He is not bad. He is lonely.': 'See? She is not bad. She is lonely.',
     'Let us show him what friends can do.': 'Let us show her what friends can do.',
     'Hmm. Why is this Gloom so sad? I want to know.': 'Hmm. Why is this treant so sad? I want to know.',
+    'That is Spike. In the big storm, a tiny Gloom fell into the sea. Now it puffs up like a pufferfish!': 'That is Spike. In the big storm, a tiny Chimera fell into the sea. Now it is very grumpy!',
   };
   /* 2. small swaps used everywhere else (in this order) */
   const SWAPS = [
@@ -37,6 +38,7 @@
     ['Sneaky Flower Treant', 'This flower treant hides in the meadow. Cheer it up!'],
     [BOSS, BOSS + ' has the last shard. Show her what friends can do!'],
     ['Stormy', 'Stormy rumbles in the clouds. Cheer Stormy up!'],
+    ['Spike', 'Spike is grumpy in the deep sea. Cheer Spike up!'],
   ];
   WORLDS.forEach((W, w) => {
     W.name = fix(W.name);

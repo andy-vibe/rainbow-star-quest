@@ -98,7 +98,7 @@ document.addEventListener('pointerdown', () => Snd.init(), { passive: true });
 /* ---------- Voice (reads text aloud) ---------- */
 const Voice = {
   on: true, voice: null,
-  pitch: { hero: 1.2, twinkle: 1.6, lumi: 1.35, pix: 0.95, nova: 1.15, mochi: 1.7, gloom: 0.6, glow: 1.4, grumble: 0.5, narr: 1.0 },
+  pitch: { hero: 1.2, twinkle: 1.6, lumi: 1.35, pix: 0.95, nova: 1.15, mochi: 1.7, gloom: 0.6, glow: 1.4, grumble: 0.5, shelly: 1.45, spike: 0.7, narr: 1.0 },
   load() {
     if (!window.speechSynthesis) return;
     const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));

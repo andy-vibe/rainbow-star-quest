@@ -148,7 +148,7 @@ function playScene(id, bg, done) {
   App.emit('scene', { id, c });
   advance();
 }
-const BADDIES = ['gloom', 'grumble', 'stormy'];   // they come in from the right, with a stomp
+const BADDIES = ['gloom', 'grumble', 'stormy', 'spike'];   // they come in from the right, with a stomp
 
 /* ================= SPECIAL EFFECTS =================
    Each one gets the scene tools (c) and returns how long it takes, in milliseconds. */
@@ -288,6 +288,47 @@ const FX = {
     c.bg.classList.add('stormy');
     for (let s = 1; s <= 8; s++) c.after(700 + s * 160, () => { bob.innerHTML = Art.gloom({ mood: s / 8, storm: true }); Snd.tone(280 + s * 70, 0.12, 'triangle', 0.1); });
     c.after(2100, () => { c.bg.classList.remove('stormy'); c.flash(); Snd.sparkle(); c.spray(['✨', '💖', '☁️'], c.pos('stormy'), 14, { dist: 220 }); });
+    return 2700;
+  },
+
+  /* ---- Coral Cove ---- */
+  /* bubbles rise up over the whole scene */
+  bubbles(c) {
+    for (let k = 0; k < 22; k++) {
+      const z = rand(12, 34) + 'px';
+      const b = c.add('', { left: rand(3, 97) + '%', top: '104%', width: z, height: z }, 'seabubble');
+      anim(b, [{ translate: '0 0' }, { translate: `${rand(-30, 30)}px -112vh` }], { duration: rand(1600, 2600), delay: k * 70, easing: 'ease-in', fill: 'both' });
+      setTimeout(() => b.remove(), 2700 + k * 70);
+    }
+    [0, 200, 400].forEach(d => c.after(d, () => Snd.tone(rand(500, 900), 0.08, 'sine', 0.08)));
+    return 1500;
+  },
+  /* fish zoom past while Shelly swims slowly */
+  slowswim(c) {
+    const a = c.actor('shelly');
+    if (a) anim(a.el, [{ translate: '0 0' }, { translate: '4% -3%', offset: 0.5 }, { translate: '0 0' }], { duration: 2200, easing: 'ease-in-out' });
+    ['🐟', '🐠', '🐟', '🐡'].forEach((e, k) => c.after(200 + k * 320, () => {
+      const f = c.add(e, { left: '-6%', top: rand(20, 55) + '%' }, 'emo big');
+      anim(f.in, [{ transform: 'scaleX(-1) translateX(0)' }, { transform: 'scaleX(-1) translateX(-115vw)' }], { duration: 700, easing: 'ease-in', fill: 'forwards' });
+      Snd.whoosh(); setTimeout(() => f.remove(), 750);
+    }));
+    return 2300;
+  },
+  /* Spike puffs up big and spiky */
+  puffup(c) {
+    const a = c.enter('spike');
+    c.after(400, () => {
+      anim(a.el.firstChild, [{ scale: '1' }, { scale: '1.35' }, { scale: '1.2' }], { duration: 500, easing: 'ease-out', fill: 'forwards' });
+      c.shake(500); c.text('PUFF!'); Snd.grr(); Snd.thud();
+    });
+    return 1300;
+  },
+  /* Spike cheers up: the spikes go down and the colors come back */
+  unpuff(c) {
+    const a = c.enter('spike'), bob = a.el.firstChild;
+    bob.innerHTML = Art.gloom({ mood: 0, puffer: true });
+    for (let s = 1; s <= 8; s++) c.after(600 + s * 160, () => { bob.innerHTML = Art.gloom({ mood: s / 8, puffer: true }); Snd.tone(280 + s * 70, 0.12, 'triangle', 0.1); });
+    c.after(1900, () => { c.flash(); Snd.sparkle(); c.spray(['✨', '💖', '🐟'], c.pos('spike'), 14, { dist: 220 }); FX.bubbles(c); });
     return 2700;
   },
 
